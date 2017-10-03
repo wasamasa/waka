@@ -32,7 +32,7 @@ The settings can be customized by placing a file at
 customizables is available in the repository.  Its key map places the
 notes from C4 to E6 on the four QWERTY rows:
 
-.. code
+.. code::
 
     |     | c5# | d5# |     | f5# | g5# | a5# |     | c6# | d6# |
     |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |  0  |
