@@ -30,7 +30,7 @@
 
 (define (identity x) x)
 
-;;; settings and imports
+;;; settings
 
 (define user-config-path
   (let ((data-home (get-environment-variable "XDG_CONFIG_HOME")))
@@ -104,7 +104,8 @@
               (instruments 0))))
 
   (Synthesizer:loadInstrument synthesizer instrument)
-  ;; without this line the instrument isn't actually used...
+  ;; NOTE: without this line the instrument isn't actually used...
+  ;; TODO: make it a per-channel thing
   (MidiChannel:programChange channel instrument-id)
 
   (print "Done!"))
@@ -559,6 +560,7 @@
                ((and (error-object? ex)
                      (equal? (error-object-message ex) "Empty input"))
                 (loop))
+               ;; TODO: catch read errors
                ((error-object? ex)
                 (display "Error: ")
                 (display (error-object-message ex))
@@ -581,7 +583,7 @@
       (free-play)))
 
 (define (quit!)
-  ;; omitting this makes it hang...
+  ;; NOTE: omitting this makes it hang...
   (Sequencer:close sequencer))
 
 (define (midi-file? path)
