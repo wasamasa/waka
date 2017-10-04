@@ -170,20 +170,17 @@
             #f))
       byte))
 
-(define (note->midi-note note octave #!optional sharp?)
-  (let* ((offset (case note
-                   ((#\c) 0)
-                   ((#\d) 2)
-                   ((#\e) 4)
-                   ((#\f) 5)
-                   ((#\g) 7)
-                   ((#\a) 9)
-                   ((#\b) 11)
-                   (else (error "Invalid note"))))
-         (midi-note (+ (* (+ octave 1) 12) offset)))
-    (if sharp?
-        (+ midi-note 1)
-        midi-note)))
+(define (note->midi-note note octave)
+  (let ((offset (case note
+                  ((#\c) 0)
+                  ((#\d) 2)
+                  ((#\e) 4)
+                  ((#\f) 5)
+                  ((#\g) 7)
+                  ((#\a) 9)
+                  ((#\b) 11)
+                  (else (error "Invalid note")))))
+    (+ (* (+ octave 1) 12) offset)))
 
 ;;; parsing
 
@@ -502,11 +499,12 @@
           ;; TODO: support more types: chord, sexp
           (case type
             ((note)
-             ;; TODO: support more modifiers: dotted, shift, ignore natural
+             ;; TODO: support more modifiers: dotted, ignore natural
              (let* ((duration (or (alist-ref 'duration value) last-duration))
                     (ticks (duration->ticks duration))
+                    (shift (or (alist-ref 'shift value) 0))
                     (note (note->midi-note (alist-ref 'key value) base-octave)))
-               (add-note track t ticks note velocity)
+               (add-note track t ticks (+ note shift) velocity)
                (loop (cdr sexps) (+ t ticks) duration)))
             ((rest)
              (let* ((duration (or value last-duration))
