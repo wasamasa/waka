@@ -446,7 +446,7 @@
             (loop (cons (read-char port) chars))
             (if (null? chars)
                 #f
-                (string->number (list->string chars)))))))
+                (string->number (list->string (reverse chars))))))))
   (define (read-digit port)
     (let ((char (peek-char port)))
       (if (digit? char)
