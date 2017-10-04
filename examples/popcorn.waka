@@ -1,0 +1,19 @@
+main:
+  ;; score stolen from https://www.youtube.com/watch?v=LVrLtvYHzKo
+  o4 a8 g a e c e < a r
+  o4 a g a e c e < a r
+  o4 a b > c < b > c < a b a b g a g a f a r
+
+  o4 a g a e c e < a r
+  o4 a g a e c e < a r
+  o4 a b > c < b > c < a b a b g a g a b > c r
+
+  o5 e d e c < g > c < e r
+  o5 e d e c < g > c < e r
+  o5 e f+ g f+ g e f+ e f+ d e d e c e r
+
+  o5 e d e c < g > c < e r
+  o5 e d e c < g > c < e r
+  o5 e f+ g f+ g e f+ e f+ d e d e < b > e r
+
+  o5 a g a e c e < a r1
