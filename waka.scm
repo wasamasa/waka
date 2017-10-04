@@ -499,10 +499,10 @@
         (let* ((sexp (car sexps))
                (type (car sexp))
                (value (cdr sexp)))
-          ;; TODO: support more types
+          ;; TODO: support more types: chord, sexp
           (case type
             ((note)
-             ;; TODO: support more modifiers
+             ;; TODO: support more modifiers: dotted, shift, ignore natural
              (let* ((duration (or (alist-ref 'duration value) last-duration))
                     (ticks (duration->ticks duration))
                     (note (note->midi-note (alist-ref 'key value) base-octave)))
@@ -705,5 +705,4 @@
 ;; TODO: add syntax for repeating notes/subsequences
 ;; TODO: check other alda syntax that's worth implementing (like
 ;; duration in ms/s)
-;; TODO: add tempo customizable
-;; TODO: implement sexps (instrument, tempo, sustain, ...)
+;; TODO: implement sexps (instrument, bpm, sustain, ...)
