@@ -64,6 +64,7 @@
 (define instrument #f)
 (define default-duration 4)
 (define base-octave #f)
+(define resolution 16) ;; ticks per quarter
 
 (define initial-mode #f)
 (define terminal #f)
@@ -470,7 +471,7 @@
         (durations->ticks duration)
         (durations->ticks (list duration))))
   (define (durations->ticks durations)
-    (fold + 0 (map (lambda (duration) (/ 64 duration)) durations)))
+    (fold + 0 (map (lambda (duration) (/ (* resolution 4) duration)) durations)))
   (define (add-note track start length key velocity)
     (let ((on (ShortMessage))
           (off (ShortMessage)))
@@ -481,7 +482,7 @@
   ;; TODO: support multiple tracks
   (when (> (length tracks) 1)
     (error "Multi-track scores not supported yet"))
-  (let* ((sequence (Sequence Sequence:PPQ 16))
+  (let* ((sequence (Sequence Sequence:PPQ resolution))
          (track (sequence:createTrack)))
     ;; TODO: send instrument change message for multi-voice support
     ;; NOTE: changing the instrument seems to only work for the synth
