@@ -570,7 +570,6 @@
                       (apply print (error-object-irritants ex)))
                     (newline))))
            (let ((sequence (parse input #f)))
-             (print sequence)
              (Sequencer:setSequence sequencer (sequence->midi sequence))
              ;; TODO: don't hardcode tempo
              (Sequencer:setTempoInBPM sequencer 120)
