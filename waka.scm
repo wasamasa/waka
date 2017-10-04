@@ -65,6 +65,8 @@
 (define default-duration 4)
 (define base-octave #f)
 (define resolution 16) ;; ticks per quarter
+;; TODO: make default bpm customizable
+(define bpm 90)
 
 (define initial-mode #f)
 (define terminal #f)
@@ -591,8 +593,7 @@
                     (newline))))
            (let ((sequence (parse input #f)))
              (Sequencer:setSequence sequencer (sequence->midi sequence))
-             ;; TODO: don't hardcode tempo
-             (Sequencer:setTempoInBPM sequencer 120)
+             (Sequencer:setTempoInBPM sequencer bpm)
              (Sequencer:start sequencer)))
           (loop))))))
 
@@ -621,7 +622,8 @@
   (let ((stream (FileInputStream path)))
     (play-midi!
      (lambda ()
-       (Sequencer:setSequence sequencer stream)))))
+       (Sequencer:setSequence sequencer stream)
+       (Sequencer:setTempoInBPM sequencer bpm)))))
 
 (define (play-waka-file! path)
   (display "Playing Waka file... ")
@@ -631,7 +633,8 @@
          (midi (sequence->midi sequence)))
     (play-midi!
      (lambda ()
-       (Sequencer:setSequence sequencer midi)))))
+       (Sequencer:setSequence sequencer midi)
+       (Sequencer:setTempoInBPM sequencer bpm)))))
 
 (define END-OF-TRACK 47)
 
