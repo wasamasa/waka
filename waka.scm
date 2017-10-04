@@ -507,7 +507,9 @@
                (add-note track t ticks (+ note shift) velocity)
                (loop (cdr sexps) (+ t ticks) duration)))
             ((rest)
-             (let* ((duration (or value last-duration))
+             (let* ((duration (if (null? value)
+                                  last-duration
+                                  value))
                     (ticks (duration->ticks duration)))
                (loop (cdr sexps) (+ t ticks) duration)))
             ((octave)
