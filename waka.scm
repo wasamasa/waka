@@ -512,6 +512,13 @@
             ((octave)
              (set! base-octave value)
              (loop (cdr sexps) t last-duration))
+            ((octave-shift)
+             (if (positive? value)
+                 (when (< base-octave 9)
+                   (set! base-octave (+ base-octave 1)))
+                 (when (>= base-octave 0)
+                   (set! base-octave (- base-octave 1))))
+             (loop (cdr sexps) t last-duration))
             (else
              ;; ignore sexp
              (loop (cdr sexps) t last-duration))))))
@@ -528,6 +535,18 @@
           ((4) (newline) #f) ; EOF
           ((10 13) (newline) (loop)) ; CR/LF
           ((0) (newline) (repl)) ; C-SPC
+          ((60) ; <
+           (when (> base-octave -1)
+             (set! base-octave (- base-octave 1))
+             (display "< ")
+             (flush-output-port))
+           (loop))
+          ((62) ; >
+           (when (< base-octave 9)
+             (set! base-octave (+ base-octave 1))
+             (display "> ")
+             (flush-output-port))
+           (loop))
           (else
            (let ((midi-note (byte->midi-note byte)))
              (when midi-note
@@ -675,7 +694,6 @@
           (apply record-midi! argv)
           (quit!)))))))
 
-;; TODO: allow changing octave in free play mode
 ;; TODO: change free play mode representation to match grammar (so
 ;; that you can copy-paste it for later usage)
 ;; TODO: read/save history file for repl mode
