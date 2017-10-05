@@ -470,14 +470,18 @@
         (durations->ticks duration)
         (durations->ticks (list duration))))
   (define (durations->ticks durations)
-    (fold + 0 (map (lambda (duration) (/ (* resolution 4) duration)) durations)))
+    (fold + 0 (map (lambda (duration) (/ (* resolution 4) duration))
+                   durations)))
+  (define (add-note-on track start key velocity)
+    (let ((note (ShortMessage)))
+      (note:setMessage ShortMessage:NOTE_ON channel-id key velocity)
+      (Track:add track (MidiEvent note start))))
+  (define (add-silent-note track start key)
+    (add-note-on track start key 0))
   (define (add-note track start length key velocity)
-    (let ((on (ShortMessage))
-          (off (ShortMessage)))
-      (on:setMessage ShortMessage:NOTE_ON channel-id key velocity)
-      (off:setMessage ShortMessage:NOTE_OFF channel-id key velocity)
-      (Track:add track (MidiEvent on start))
-      (Track:add track (MidiEvent off (+ start length)))))
+    (add-note-on track start key velocity)
+    ;; TODO: implement quantization (by terminating the note earlier)
+    (add-silent-note track (+ start length) key))
   ;; TODO: support multiple tracks
   (when (> (length tracks) 1)
     (error "Multi-track scores not supported yet"))
@@ -511,6 +515,11 @@
                                   last-duration
                                   value))
                     (ticks (duration->ticks duration)))
+               ;; HACK: ensure final rest isn't cut off
+               ;; NOTE: this will only work if the rest is the last
+               ;; thing in the score
+               (when (null? (cdr sexps))
+                 (add-silent-note track (+ t ticks) 0))
                (loop (cdr sexps) (+ t ticks) duration)))
             ((octave)
              (set! base-octave value)
