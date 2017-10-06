@@ -67,6 +67,8 @@
 (define resolution 16) ;; ticks per quarter
 ;; TODO: make default bpm customizable
 (define bpm 90)
+;; TODO: make default quantization customizable
+(define quantization 1)
 
 (define initial-mode #f)
 (define terminal #f)
@@ -480,8 +482,8 @@
     (add-note-on track start key 0))
   (define (add-note track start length key velocity)
     (add-note-on track start key velocity)
-    ;; TODO: implement quantization (by terminating the note earlier)
-    (add-silent-note track (+ start length) key))
+    (let ((end (+ start (exact (round (* quantization length))))))
+      (add-silent-note track end key)))
   ;; TODO: support multiple tracks
   (when (> (length tracks) 1)
     (error "Multi-track scores not supported yet"))
@@ -715,3 +717,4 @@
 ;; TODO: check other alda syntax that's worth implementing (like
 ;; duration in ms/s)
 ;; TODO: implement sexps (instrument, bpm, sustain, ...)
+;; TODO: add auto-completion for sexps
