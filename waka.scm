@@ -467,10 +467,13 @@
 ;; http://archive.oreilly.com/pub/a/onjava/excerpt/jenut3_ch17/index1.html
 
 (define (sequence->midi tracks)
-  (define (duration->ticks duration)
-    (if (pair? duration)
-        (durations->ticks duration)
-        (durations->ticks (list duration))))
+  (define (duration->ticks duration #!optional dotted)
+    (let ((ticks (if (pair? duration)
+                     (durations->ticks duration)
+                     (durations->ticks (list duration)))))
+      (if dotted
+          (exact (round (* ticks (- 2 (/ 1 (expt 2 dotted))))))
+          ticks)))
   (define (durations->ticks durations)
     (fold + 0 (map (lambda (duration) (/ (* resolution 4) duration))
                    durations)))
@@ -505,9 +508,11 @@
           ;; TODO: support more types: chord, sexp
           (case type
             ((note)
-             ;; TODO: support more modifiers: dotted, ignore natural
+             ;; TODO: support natural modifier (after supporting key
+             ;; signature)
              (let* ((duration (or (alist-ref 'duration value) last-duration))
-                    (ticks (duration->ticks duration))
+                    (dotted (alist-ref 'dotted value))
+                    (ticks (duration->ticks duration dotted))
                     (shift (or (alist-ref 'shift value) 0))
                     (note (note->midi-note (alist-ref 'key value) base-octave)))
                (add-note track t ticks (+ note shift) velocity)
