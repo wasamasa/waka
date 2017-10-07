@@ -216,7 +216,7 @@
              ((whitespace? char)
               (read-whitespace port)
               (loop tokens))
-             ((eqv? char #\;)
+             ((eqv? char #\#)
               (read-line port)
               (loop tokens))
              ((eqv? char #\()
@@ -509,6 +509,7 @@
           ;; TODO: support more types: chord, sexp
           (case type
             ((note)
+             ;; TODO: support octave shift modifier
              ;; TODO: support natural modifier (after supporting key
              ;; signature)
              (let* ((duration (alist-ref 'duration value))

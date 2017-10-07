@@ -79,7 +79,7 @@
                 (note (key . #\a))
                 (note (key . #\c))
                 (note (key . #\e)))))
-            (parse "a/c/e ;; ignore this" #f))
+            (parse "a/c/e # ignore this" #f))
 
 (test-equal '(((octave . 3)
                (note (key . #\c)

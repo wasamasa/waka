@@ -1,5 +1,5 @@
 main:
-  ;; score stolen from https://www.youtube.com/watch?v=LVrLtvYHzKo
+  # score stolen from https://www.youtube.com/watch?v=LVrLtvYHzKo
   o4 a8 g a e c e < a r
   o4 a g a e c e < a r
   o4 a b > c < b > c < a b a b g a g a f a r
