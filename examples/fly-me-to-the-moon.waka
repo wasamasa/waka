@@ -1,0 +1,31 @@
+main:
+  # taken from https://www.scribd.com/doc/42170117/Fly-Me-to-the-Moon-Music-Sheet
+  o6 e4.- d8 c < b- | a4.- b8- > c e- | d4.   c8 < b- a- | g2.
+  #  Fly  me to  the  moon and let me   play  a-mong  the  stars.
+  o6 c4. < b8- a-  g |  f4.    g8 a- > c | < b4. a8- g   f | e2-   e4
+  #  Let   me  see what spring is like on    Ju- pi- ter and Mars. In
+  o5 f8 > c  c2.   e4-  d | < b2~1~2- d4 | e8- a- a2~1-
+  #  oth- er words hold my    hand!   In   oth-er words
+  o6 c4 < b- | a-   g1 r4 | > e.-  d8 c <   b- | a4.- b8- > c   e-
+  #  dar- ling kiss me!       Fill my heart with song and   let me
+  o6 d4.  c8 < b- a- | g2. > c4. < b8- a-  g | f4.  g8  a- > c8 | < b4. a8-  g   f
+  #  sing for- ev-er   more. You   are all I   long for all  I      wor-ship and a-
+  o5 e2-. | e4 f8 >  c  c2~1  e4-    d | < b2~1~2- b4
+  #  dore.  In oth-  er words please be    true!   In
+  o6 c8 < e- e2.-   e4- f  | e2.-
+  #  oth- er words: I   love you!
+
+  o6 e4.- d8 c < b- | a4.- b8- > c e- | d4.   c8 < b- a- | g2.
+  #  Fly  me to  the  moon and let me   play  a-mong  the  stars.
+  o6 c4. < b8- a-  g |  f4.    g8 a- > c | < b4. a8- g   f | e2-   e4
+  #  Let   me  see what spring is like on    Ju- pi- ter and Mars. In
+  o5 f8 > c  c2.   e4-  d | < b2~1~2- d4 | e8- a- a2~1-
+  #  oth- er words hold my    hand!   In   oth-er words
+  o6 c4 < b- | a-   g1 r4 | > e.-  d8 c <   b- | a4.- b8- > c   e-
+  #  dar- ling kiss me!       Fill my heart with song and   let me
+  o6 d4.  c8 < b- a- | g2. > c4. < b8- a-  g | f4.  g8  a- > c8 | < b4. a8-  g   f
+  #  sing for- ev-er   more. You   are all I   long for all  I      wor-ship and a-
+  o5 e2-. | e4 f8 >  c  c2~1  e4-    d     g2~1~2  e4-
+  #  dore.  In oth-  er words please be    true!   In
+  o6 f8   c  c2.    d4  f  | e2.-
+  #  oth- er words: I   love you!
