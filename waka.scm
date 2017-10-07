@@ -491,7 +491,8 @@
   (when (> (length tracks) 1)
     (error "Multi-track scores not supported yet"))
   (let* ((sequence (Sequence Sequence:PPQ resolution))
-         (track (sequence:createTrack)))
+         (track (sequence:createTrack))
+         (last-dotted #f))
     ;; TODO: send instrument change message for multi-voice support
     ;; NOTE: changing the instrument seems to only work for the synth
     ;; or a channel, so you'd need to stop hardcoding channel 0 and
@@ -510,13 +511,20 @@
             ((note)
              ;; TODO: support natural modifier (after supporting key
              ;; signature)
-             (let* ((duration (or (alist-ref 'duration value) last-duration))
+             (let* ((duration (alist-ref 'duration value))
                     (dotted (alist-ref 'dotted value))
-                    (ticks (duration->ticks duration dotted))
                     (shift (or (alist-ref 'shift value) 0))
                     (note (note->midi-note (alist-ref 'key value) base-octave)))
-               (add-note track t ticks (+ note shift) velocity)
-               (loop (cdr sexps) (+ t ticks) duration)))
+               ;; NOTE: reset dotted modifier when given a new
+               ;; duration, otherwise reuse (last) dotted value
+               (when duration
+                 (set! last-dotted #f))
+               (let* ((duration (or duration last-duration))
+                      (dotted (or dotted last-dotted))
+                      (ticks (duration->ticks duration dotted)))
+                 (add-note track t ticks (+ note shift) velocity)
+                 (set! last-dotted dotted)
+                 (loop (cdr sexps) (+ t ticks) duration))))
             ((rest)
              (let* ((duration (if (null? value)
                                   last-duration
