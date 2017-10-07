@@ -731,3 +731,5 @@
 ;; duration in ms/s)
 ;; TODO: implement sexps (instrument, bpm, sustain, ...)
 ;; TODO: add auto-completion for sexps
+;; TODO: allow setting midi metadata with sexps
+;; TODO: add debug mode
