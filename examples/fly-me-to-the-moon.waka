@@ -1,5 +1,8 @@
 main:
   # taken from https://www.scribd.com/doc/42170117/Fly-Me-to-the-Moon-Music-Sheet
+
+  # TODO: add backing track with chords
+
   o6 e4.- d8 c < b- | a4.- b8- > c e- | d4.   c8 < b- a- | g2.
   #  Fly  me to  the  moon and let me   play  a-mong  the  stars.
   o6 c4. < b8- a-  g |  f4.    g8 a- > c | < b4. a8- g   f | e2-   e4

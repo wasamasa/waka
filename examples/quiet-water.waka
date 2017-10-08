@@ -1,4 +1,11 @@
 main:
   # taken from https://dl.dropboxusercontent.com/s/f5nkneo570x6drf/Undertale%20Sheet%20Music.zip?dl=0
+
+  # the following notes should be played as triplets, but that would
+  # require implementing CRAM, so I've instead increased the BPM
+  (bpm 150)
+
+  # TODO: implement shift modifier and convert every note to an octave interval
+
   o4 c2 f g+ f | g4 g+ a+ f | g1~1
-  o4 g4 g+ a+ > c < g2+ g c f d+ < g+ a1+
+  o4 g4 g+ a+ > c < g2+ g c f d+ < g+ a1+ r1
