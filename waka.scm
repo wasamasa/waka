@@ -520,6 +520,9 @@
                         (chord-duration #f))
                     (for-each
                      (lambda (value)
+                       ;; TODO: support rests in chords
+                       ;; NOTE: https://github.com/alda-lang/alda/blob/master/doc/chords.md
+                       ;; explains why you'd want that
                        (let* ((duration (alist-ref 'duration value))
                               (dotted (alist-ref 'dotted value))
                               (shift (or (alist-ref 'shift value) 0))
