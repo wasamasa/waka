@@ -51,6 +51,8 @@
 (define user-prompt (alist-ref 'prompt user-config))
 (define user-soundbank-path (alist-ref 'soundbank user-config))
 (define user-velocity (alist-ref 'default-velocity user-config))
+(define user-bpm (alist-ref 'default-bpm user-config))
+(define user-quantization (alist-ref 'default-quantization user-config))
 
 (define synthesizer #f)
 (define sequencer #f)
@@ -65,10 +67,8 @@
 (define default-duration 4)
 (define base-octave #f)
 (define resolution 16) ;; ticks per quarter
-;; TODO: make default bpm customizable
-(define bpm 90)
-;; TODO: make default quantization customizable
-(define quantization 1)
+(define bpm #f)
+(define quantization #f)
 
 (define initial-mode #f)
 (define terminal #f)
@@ -93,6 +93,8 @@
   (set! channel (channels channel-id))
   (set! velocity (or user-velocity 64))
   (set! base-octave (or user-base-octave 4))
+  (set! bpm (or user-bpm 120))
+  (set! quantization (or user-quantization 1.0))
 
   (set! soundbank
         (if user-soundbank-path
