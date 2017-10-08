@@ -507,7 +507,6 @@
              (let* ((sexp (car sexps))
                     (type (car sexp))
                     (value (cdr sexp)))
-               ;; TODO: support more types: sexp
                (case type
                  ((note chord)
                   ;; TODO: support octave shift modifier
@@ -567,9 +566,29 @@
                       (when (>= base-octave 0)
                         (set! base-octave (- base-octave 1))))
                   (loop (cdr sexps) t last-duration))
+                 ((sexp)
+                  (let ((type (car value))
+                        (value (cdr value)))
+                    (case type
+                      ;; TODO: instrument, sustain (after implementing it)
+                      ;; TODO: allow setting midi metadata with sexps
+                      ((velocity)
+                       (if (null? value)
+                           (print velocity)
+                           (set! velocity (car value))))
+                      ((tempo bpm)
+                       (if (null? value)
+                           (print bpm)
+                           (set! bpm (car value))))
+                      ((quant quantize quantization)
+                       (if (null? value)
+                           (print quantization)
+                           (set! quantization (car value))))
+                      (else
+                       (error "Unknown sexp type" type)))
+                    (loop (cdr sexps) t last-duration)))
                  (else
-                  (print "Ignoring sexp" sexp)
-                  (loop (cdr sexps) t last-duration))))))))
+                  (error "Unimplemented item type" type))))))))
        tracks)
      sequence))
 
@@ -751,7 +770,5 @@
 ;; TODO: add syntax for repeating notes/subsequences
 ;; TODO: check other alda syntax that's worth implementing (like
 ;; duration in ms/s)
-;; TODO: implement sexps (instrument, bpm, sustain, ...)
 ;; TODO: add auto-completion for sexps
-;; TODO: allow setting midi metadata with sexps
 ;; TODO: add debug mode
