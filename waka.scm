@@ -487,70 +487,71 @@
     (add-note-on track start key velocity)
     (let ((end (+ start (exact (round (* quantization length))))))
       (add-silent-note track end key)))
-  ;; TODO: support multiple tracks
-  (when (> (length tracks) 1)
-    (error "Multi-track scores not supported yet"))
-  (let* ((sequence (Sequence Sequence:PPQ resolution))
-         (track (sequence:createTrack))
-         (last-dotted #f))
-    ;; TODO: send instrument change message for multi-voice support
-    ;; NOTE: changing the instrument seems to only work for the synth
-    ;; or a channel, so you'd need to stop hardcoding channel 0 and
-    ;; treat channel 9 specially
-    ;; NOTE: consider changing track name syntax to instrument number
-    ;; (how would you do percussion then?)
-    (let loop ((sexps (car tracks))
-               (t 0)
-               (last-duration default-duration))
-      (when (pair? sexps)
-        (let* ((sexp (car sexps))
-               (type (car sexp))
-               (value (cdr sexp)))
-          ;; TODO: support more types: chord, sexp
-          (case type
-            ((note)
-             ;; TODO: support octave shift modifier
-             ;; TODO: support natural modifier (after supporting key
-             ;; signature)
-             (let* ((duration (alist-ref 'duration value))
-                    (dotted (alist-ref 'dotted value))
-                    (shift (or (alist-ref 'shift value) 0))
-                    (note (note->midi-note (alist-ref 'key value) base-octave)))
-               ;; NOTE: reset dotted modifier when given a new
-               ;; duration, otherwise reuse (last) dotted value
-               (when duration
-                 (set! last-dotted #f))
-               (let* ((duration (or duration last-duration))
-                      (dotted (or dotted last-dotted))
-                      (ticks (duration->ticks duration dotted)))
-                 (add-note track t ticks (+ note shift) velocity)
-                 (set! last-dotted dotted)
-                 (loop (cdr sexps) (+ t ticks) duration))))
-            ((rest)
-             (let* ((duration (if (null? value)
-                                  last-duration
-                                  value))
-                    (ticks (duration->ticks duration)))
-               ;; HACK: ensure final rest isn't cut off
-               ;; NOTE: this will only work if the rest is the last
-               ;; thing in the score
-               (when (null? (cdr sexps))
-                 (add-silent-note track (+ t ticks) 0))
-               (loop (cdr sexps) (+ t ticks) duration)))
-            ((octave)
-             (set! base-octave value)
-             (loop (cdr sexps) t last-duration))
-            ((octave-shift)
-             (if (positive? value)
-                 (when (< base-octave 9)
-                   (set! base-octave (+ base-octave 1)))
-                 (when (>= base-octave 0)
-                   (set! base-octave (- base-octave 1))))
-             (loop (cdr sexps) t last-duration))
-            (else
-             ;; ignore sexp
-             (loop (cdr sexps) t last-duration))))))
-    sequence))
+  (let ((sequence (Sequence Sequence:PPQ resolution)))
+    (for-each
+     (lambda (sexps)
+       (let ((track (sequence:createTrack))
+             (last-dotted #f))
+         ;; TODO: send instrument change message for multi-voice support
+         ;; NOTE: changing the instrument seems to only work for the synth
+         ;; or a channel, so you'd need to stop hardcoding channel 0 and
+         ;; treat channel 9 specially
+         ;; NOTE: consider changing track name syntax to instrument number
+         ;; (how would you do percussion then?)
+         (let loop ((sexps sexps)
+                    (t 0)
+                    (last-duration default-duration))
+           (when (pair? sexps)
+             (let* ((sexp (car sexps))
+                    (type (car sexp))
+                    (value (cdr sexp)))
+               ;; TODO: support more types: chord, sexp
+               (case type
+                 ((note)
+                  ;; TODO: support octave shift modifier
+                  ;; TODO: support natural modifier (after supporting key
+                  ;; signature)
+                  (let* ((duration (alist-ref 'duration value))
+                         (dotted (alist-ref 'dotted value))
+                         (shift (or (alist-ref 'shift value) 0))
+                         (note (note->midi-note (alist-ref 'key value)
+                                                base-octave)))
+                    ;; NOTE: reset dotted modifier when given a new
+                    ;; duration, otherwise reuse (last) dotted value
+                    (when duration
+                      (set! last-dotted #f))
+                    (let* ((duration (or duration last-duration))
+                           (dotted (or dotted last-dotted))
+                           (ticks (duration->ticks duration dotted)))
+                      (add-note track t ticks (+ note shift) velocity)
+                      (set! last-dotted dotted)
+                      (loop (cdr sexps) (+ t ticks) duration))))
+                 ((rest)
+                  (let* ((duration (if (null? value)
+                                       last-duration
+                                       value))
+                         (ticks (duration->ticks duration)))
+                    ;; HACK: ensure final rest isn't cut off
+                    ;; NOTE: this will only work if the rest is the last
+                    ;; thing in the score
+                    (when (null? (cdr sexps))
+                      (add-silent-note track (+ t ticks) 0))
+                    (loop (cdr sexps) (+ t ticks) duration)))
+                 ((octave)
+                  (set! base-octave value)
+                  (loop (cdr sexps) t last-duration))
+                 ((octave-shift)
+                  (if (positive? value)
+                      (when (< base-octave 9)
+                        (set! base-octave (+ base-octave 1)))
+                      (when (>= base-octave 0)
+                        (set! base-octave (- base-octave 1))))
+                  (loop (cdr sexps) t last-duration))
+                 (else
+                  ;; ignore sexp
+                  (loop (cdr sexps) t last-duration))))))))
+       tracks)
+     sequence))
 
 ;;; play modes
 
