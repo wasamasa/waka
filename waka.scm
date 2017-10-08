@@ -494,7 +494,7 @@
      (lambda (sexps)
        (let ((track (sequence:createTrack))
              (last-dotted #f))
-         ;; TODO: send instrument change message for multi-voice support
+         ;; TODO: send instrument change message for multi-instrument support
          ;; NOTE: changing the instrument seems to only work for the synth
          ;; or a channel, so you'd need to stop hardcoding channel 0 and
          ;; treat channel 9 specially
@@ -507,27 +507,42 @@
              (let* ((sexp (car sexps))
                     (type (car sexp))
                     (value (cdr sexp)))
-               ;; TODO: support more types: chord, sexp
+               ;; TODO: support more types: sexp
                (case type
-                 ((note)
+                 ((note chord)
                   ;; TODO: support octave shift modifier
                   ;; TODO: support natural modifier (after supporting key
                   ;; signature)
-                  (let* ((duration (alist-ref 'duration value))
-                         (dotted (alist-ref 'dotted value))
-                         (shift (or (alist-ref 'shift value) 0))
-                         (note (note->midi-note (alist-ref 'key value)
-                                                base-octave)))
-                    ;; NOTE: reset dotted modifier when given a new
-                    ;; duration, otherwise reuse (last) dotted value
-                    (when duration
-                      (set! last-dotted #f))
-                    (let* ((duration (or duration last-duration))
-                           (dotted (or dotted last-dotted))
-                           (ticks (duration->ticks duration dotted)))
-                      (add-note track t ticks (+ note shift) velocity)
-                      (set! last-dotted dotted)
-                      (loop (cdr sexps) (+ t ticks) duration))))
+                  (let ((values (if (eq? type 'note)
+                                    (list value)
+                                    (map cdr value)))
+                        (chord-ticks #f)
+                        (chord-duration #f))
+                    (for-each
+                     (lambda (value)
+                       (let* ((duration (alist-ref 'duration value))
+                              (dotted (alist-ref 'dotted value))
+                              (shift (or (alist-ref 'shift value) 0))
+                              (note (note->midi-note (alist-ref 'key value)
+                                                     base-octave)))
+                         ;; NOTE: reset dotted modifier when given a new
+                         ;; duration, otherwise reuse (last) dotted value
+                         (when duration
+                           (set! last-dotted #f))
+                         (let* ((duration (or duration last-duration))
+                                (dotted (or dotted last-dotted))
+                                (ticks (duration->ticks duration dotted)))
+                           (add-note track t ticks (+ note shift) velocity)
+                           (set! last-dotted dotted)
+                           (if chord-ticks
+                               (when (< ticks chord-ticks)
+                                 (set! chord-ticks ticks)
+                                 (set! chord-duration duration))
+                               (begin
+                                 (set! chord-ticks ticks)
+                                 (set! chord-duration duration))))))
+                     values)
+                    (loop (cdr sexps) (+ t chord-ticks) chord-duration)))
                  ((rest)
                   (let* ((duration (if (null? value)
                                        last-duration
@@ -550,7 +565,7 @@
                         (set! base-octave (- base-octave 1))))
                   (loop (cdr sexps) t last-duration))
                  (else
-                  ;; ignore sexp
+                  (print "Ignoring sexp" sexp)
                   (loop (cdr sexps) t last-duration))))))))
        tracks)
      sequence))
