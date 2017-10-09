@@ -7,6 +7,7 @@
 (import (srfi 1))
 
 (import (class java.io File FileInputStream Reader))
+(import (class java.util HashMap))
 (import (class javax.sound.midi
                Instrument MetaMessage MidiChannel
                MidiEvent MidiFileFormat MidiSystem
@@ -32,12 +33,17 @@
 
 ;;; settings
 
+(define (xdg-path environment-variable fallback path)
+  (let ((home (get-environment-variable environment-variable)))
+    (if (and home (eqv? (string-ref home 0) #\/))
+        (string-append home path)
+        (string-append (get-environment-variable "HOME") fallback path))))
+
 (define user-config-path
-  (let ((data-home (get-environment-variable "XDG_CONFIG_HOME")))
-    (if (and data-home (eqv? (string-ref data-home 0) #\/))
-        (string-append data-home "/waka/config")
-        (string-append (get-environment-variable "HOME")
-                       "/.config/waka/config"))))
+  (xdg-path "XDG_CONFIG_HOME" "/.config" "/waka/config"))
+
+(define repl-history-path ::String
+  (xdg-path "XDG_DATA_HOME" "/.local/share" "/waka/repl_history"))
 
 (define user-config
   (if (file-exists? user-config-path)
@@ -61,6 +67,8 @@
 (define channel #f)
 (define velocity #f)
 (define soundbank #f)
+;; TODO: allow another customizable for instrument aliases
+;; NOTE: http://www.jimmenard.com/midi_ref.html#General_MIDI
 (define instruments #f)
 (define instrument-id #f)
 (define instrument #f)
@@ -73,6 +81,7 @@
 (define initial-mode #f)
 (define terminal #f)
 (define reader #f)
+(define reader-options #f)
 
 ;;; MIDI initialization
 ;; adapted from http://patater.com/gbaguy/javamidi.htm
@@ -133,8 +142,14 @@
 
   (Terminal:enterRawMode terminal)
 
+  (set! reader-options
+        (let ((m (HashMap)))
+          (m:put LineReader:HISTORY_FILE (File repl-history-path))
+          m))
+
   (set! reader
         (let* ((builder (LineReaderBuilder:builder))
+               (builder (builder:variables reader-options))
                (builder (builder:terminal terminal)))
           (builder:build)))
 
@@ -496,8 +511,8 @@
              (last-dotted #f))
          ;; TODO: send instrument change message for multi-instrument support
          ;; NOTE: changing the instrument seems to only work for the synth
-         ;; or a channel, so you'd need to stop hardcoding channel 0 and
-         ;; treat channel 9 specially
+         ;; or a channel, so you'd need to stop hardcoding channel 0,
+         ;; start using more than one channel and treat channel 9 specially
          ;; NOTE: consider changing track name syntax to instrument number
          ;; (how would you do percussion then?)
          (let loop ((sexps sexps)
@@ -570,8 +585,11 @@
                   (let ((type (car value))
                         (value (cdr value)))
                     (case type
-                      ;; TODO: instrument, sustain (after implementing it)
+                      ;; TODO: instrument (create instrument change procedure)
+                      ;; TODO: sustain (implement that feature first)
+                      ;; TODO: dampening pedal (see above)
                       ;; TODO: allow setting midi metadata with sexps
+                      ;; TODO: per track vs global settings (velocity?)
                       ((velocity)
                        (if (null? value)
                            (print velocity)
@@ -765,7 +783,8 @@
 
 ;; TODO: change free play mode representation to match grammar (so
 ;; that you can copy-paste it for later usage)
-;; TODO: read/save history file for repl mode
+;; NOTE: print out base octave first, replace # by +, print < or > if
+;; the played note is in a different octave than the last
 ;; TODO: add subsequence syntax (like { ... })
 ;; TODO: add syntax for repeating notes/subsequences
 ;; TODO: check other alda syntax that's worth implementing (like
