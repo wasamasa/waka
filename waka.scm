@@ -157,29 +157,33 @@
 
 ;;; MIDI utils
 
+(define (midi-note-octave note)
+  (when (or (< note 0) (> note 127))
+    (error "Note must be between 0 and 127 (inclusive)"))
+  (- (quotient note 12) 1))
+
 (define (midi-note->string note)
   (when (or (< note 0) (> note 127))
     (error "Note must be between 0 and 127 (inclusive)"))
-  (let* ((octave (- (quotient note 12) 1))
-         (note+sharp (case (remainder note 12)
+  (let* ((note+sharp (case (remainder note 12)
                        ((0)  '("c"))
-                       ((1)  '("c" . "#"))
+                       ((1)  '("c" . "+"))
                        ((2)  '("d"))
-                       ((3)  '("d" . "#"))
+                       ((3)  '("d" . "+"))
                        ((4)  '("e"))
                        ((5)  '("f"))
-                       ((6)  '("f" . "#"))
+                       ((6)  '("f" . "+"))
                        ((7)  '("g"))
-                       ((8)  '("g" . "#"))
+                       ((8)  '("g" . "+"))
                        ((9)  '("a"))
-                       ((10) '("a" . "#"))
+                       ((10) '("a" . "+"))
                        ((11) '("b"))
                        (else (error "This shouldn't happen"))))
          (note (car note+sharp))
          (sharp (cdr note+sharp)))
     (if (null? sharp)
-        (string-append note (number->string octave))
-        (string-append note (number->string octave) sharp))))
+        note
+        (string-append note sharp))))
 
 (define (byte->midi-note byte)
   (if user-map
@@ -613,33 +617,49 @@
 ;;; play modes
 
 (define (free-play)
+  (define (display-octave octave)
+    (display "o")
+    (display octave)
+    (display " ")
+    (flush-output-port))
   (print "Free play mode entered, toggle with C-SPC")
-  (let ((reader (Terminal:reader terminal)))
+  (display-octave base-octave)
+  (let ((reader (Terminal:reader terminal))
+        (last-octave base-octave))
     (let loop ()
       (let ((byte (Reader:read reader)))
         (case byte
           ((4) (newline) #f) ; EOF
-          ((10 13) (newline) (loop)) ; CR/LF
+          ((10 13) (newline) (display-octave last-octave) (loop)) ; CR/LF
           ((0) (newline) (repl)) ; C-SPC
           ((60) ; <
            (when (> base-octave -1)
              (set! base-octave (- base-octave 1))
+             (set! last-octave base-octave)
              (display "< ")
              (flush-output-port))
            (loop))
           ((62) ; >
            (when (< base-octave 9)
              (set! base-octave (+ base-octave 1))
+             (set! last-octave base-octave)
              (display "> ")
              (flush-output-port))
            (loop))
           (else
-           (let ((midi-note (byte->midi-note byte)))
+           (let* ((midi-note (byte->midi-note byte))
+                  (octave (and midi-note (midi-note-octave midi-note))))
              (when midi-note
                (MidiChannel:noteOn channel midi-note velocity)
+               (cond
+                ((> octave last-octave)
+                 (display (string-repeat "> " (- octave last-octave))))
+                ((< octave last-octave)
+                 (display (string-repeat "< " (- last-octave octave)))))
                (display (midi-note->string midi-note))
                (display " ")
-               (flush-output-port)))
+               (flush-output-port)
+               (set! last-octave octave)))
            (loop)))))))
 
 (define (repl)
@@ -781,10 +801,6 @@
           (apply record-midi! argv)
           (quit!)))))))
 
-;; TODO: change free play mode representation to match grammar (so
-;; that you can copy-paste it for later usage)
-;; NOTE: print out base octave first, replace # by +, print < or > if
-;; the played note is in a different octave than the last
 ;; TODO: add subsequence syntax (like { ... })
 ;; TODO: add syntax for repeating notes/subsequences
 ;; TODO: check other alda syntax that's worth implementing (like
