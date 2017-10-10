@@ -6,6 +6,7 @@
 (import (scheme write))
 (import (srfi 1))
 
+(import (class gnu.text SyntaxException))
 (import (class java.io File FileInputStream Reader))
 (import (class java.util HashMap))
 (import (class javax.sound.midi
@@ -682,10 +683,14 @@
                   (display (make-string indent #\space))
                   (display (make-string (max (- width indent) 1) #\^))
                   (newline)))
+               ((read-error? ex)
+                (display "Error: ")
+                (display (SyntaxException:getMessage ex))
+                (flush-output-port)
+                (loop))
                ((and (error-object? ex)
                      (equal? (error-object-message ex) "Empty input"))
                 (loop))
-               ;; TODO: catch read errors
                ((error-object? ex)
                 (display "Error: ")
                 (display (error-object-message ex))
