@@ -8,7 +8,6 @@
 
 (import (class gnu.text SyntaxException))
 (import (class java.io File FileInputStream Reader))
-(import (class java.util HashMap))
 (import (class javax.sound.midi
                Instrument MetaMessage MidiChannel
                MidiEvent MidiFileFormat MidiSystem
@@ -82,7 +81,6 @@
 (define initial-mode #f)
 (define terminal #f)
 (define reader #f)
-(define reader-options #f)
 
 ;;; MIDI initialization
 ;; adapted from http://patater.com/gbaguy/javamidi.htm
@@ -143,16 +141,14 @@
 
   (Terminal:enterRawMode terminal)
 
-  (set! reader-options
-        (let ((m (HashMap)))
-          (m:put LineReader:HISTORY_FILE (File repl-history-path))
-          m))
-
   (set! reader
         (let* ((builder (LineReaderBuilder:builder))
-               (builder (builder:variables reader-options))
+               (builder (builder:variable LineReader:HISTORY_FILE
+                                          (File repl-history-path)))
                (builder (builder:terminal terminal)))
           (builder:build)))
+
+  (LineReader:unsetOpt reader LineReader:Option:HISTORY_IGNORE_SPACE)
 
   (print "Exit with C-d"))
 
