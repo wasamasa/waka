@@ -222,6 +222,13 @@
       (token-port-tokens-set! port (cdr tokens)))
     token))
 
+(define (read-all-tokens port)
+  (let loop ((tokens '()))
+    (let ((token (read-token port)))
+      (if (eof-object? token)
+          (reverse tokens)
+          (loop (cons token tokens))))))
+
 (define (string->tokens input)
   (define (whitespace? char)
     (or (char-whitespace? char) (eqv? char #\|)))
@@ -285,8 +292,8 @@
              ((eof-object? (peek-token token-port))
               (reverse tracks))
              (else
-              ;; TODO: read all tokens and join them
-              (error "Trailing garbage" (peek-token token-port))))))))
+              (error "Trailing garbage"
+                     (string-join (read-all-tokens token-port)))))))))
   (define (parse-track token-port)
     (let ((name (parse-name token-port)))
       (if name
@@ -317,11 +324,16 @@
       (let ((item (parse-item token-port)))
         (if item
             (loop (cons item items))
-            (if (null? items)
-                (if top-level?
-                    (error "Expected item")
-                    #f)
-                (reverse items))))))
+            (cond
+             ((null? items)
+              (if top-level?
+                  (error "Expected item")
+                  #f))
+             ((and top-level? (not (eof-object? (peek-token token-port))))
+              (error "Trailing garbage"
+                     (string-join (read-all-tokens token-port))))
+             (else
+              (reverse items)))))))
   (define (parse-item token-port)
     (let ((token (peek-token token-port)))
       (cond
