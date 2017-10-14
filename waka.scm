@@ -329,6 +329,12 @@
         (read-token token-port)
         (cons 'sexp token))
        ((name-token? token) #f)
+       ((equal? token "<")
+        (read-token token-port)
+        '(octave-shift . -1))
+       ((equal? token ">")
+        (read-token token-port)
+        '(octave-shift . 1))
        ((string? token)
         (read-token token-port)
         (parameterize ((last-token token))
@@ -338,7 +344,6 @@
     (let ((item (or (read-chord port)
                     (read-rest port)
                     (read-octave port)
-                    (read-octave-shift port)
                     #f)))
       (cond
        ((eof-object? (peek-char port))
@@ -361,13 +366,17 @@
                     note)))
           #f)))
   (define (read-note port)
-    (let ((key (read-key port)))
+    (let* ((octave-shifts (read-octave-shifts port))
+           (key (read-key port)))
       (if key
           (let loop ((modifiers '()))
             (let ((modifier (read-modifier port)))
               (if modifier
                   (loop (cons modifier modifiers))
-                  `(note (key . ,key) ,@(reverse modifiers)))))
+                  (let ((modifiers (if octave-shifts
+                                       (cons octave-shifts modifiers)
+                                       modifiers)))
+                    `(note (key . ,key) ,@(reverse modifiers))))))
           #f)))
   (define (read-key port)
     (if (memv (peek-char port) '(#\a #\b #\c #\d #\e #\f #\g))
@@ -379,7 +388,6 @@
      ((read-accidentals port) => identity)
      ((read-natural port) '(natural . #t))
      ((read-dotted port) => identity)
-     ((read-octave-shifts port) => identity)
      (else #f)))
   (define (read-accidentals port)
     (let loop ((accidentals '()))
@@ -428,12 +436,6 @@
               `(octave . ,octave)
               (parse-error port (last-token) "Invalid octave")))
         #f))
-  (define (read-octave-shift port)
-    (let ((char (peek-char port)))
-      (case char
-        ((#\<) (read-char port) '(octave-shift . -1))
-        ((#\>) (read-char port) '(octave-shift . 1))
-        (else #f))))
   (define (digit? char)
     (memv char '(#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9)))
   (define (valid-duration? duration)
@@ -531,10 +533,16 @@
                   (let ((values (if (eq? type 'note)
                                     (list value)
                                     (map cdr value)))
+                        ;; NOTE: octave shifts in chords shouldn't
+                        ;; affect notes after the chord
+                        (chord-octave base-octave)
                         (chord-ticks #f)
                         (chord-duration #f))
                     (for-each
                      (lambda (value)
+                       (let ((octave-shift (alist-ref 'octave-shift value)))
+                         (when octave-shift
+                           (set! chord-octave (+ chord-octave octave-shift))))
                        ;; TODO: support rests in chords
                        ;; NOTE: https://github.com/alda-lang/alda/blob/master/doc/chords.md
                        ;; explains why you'd want that
@@ -542,7 +550,7 @@
                               (dotted (alist-ref 'dotted value))
                               (shift (or (alist-ref 'shift value) 0))
                               (note (note->midi-note (alist-ref 'key value)
-                                                     base-octave)))
+                                                     chord-octave)))
                          ;; NOTE: reset dotted modifier when given a new
                          ;; duration, otherwise reuse (last) dotted value
                          (when duration
