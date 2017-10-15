@@ -528,6 +528,8 @@
          ;; NOTE: changing the instrument seems to only work for the synth
          ;; or a channel, so you'd need to stop hardcoding channel 0,
          ;; start using more than one channel and treat channel 9 specially
+         ;; NOTE: you could have a procedure returning the next
+         ;; available free general/percussion channel
          ;; NOTE: consider changing track name syntax to instrument number
          ;; (how would you do percussion then?)
          (let loop ((sexps sexps)
@@ -539,7 +541,6 @@
                     (value (cdr sexp)))
                (case type
                  ((note chord)
-                  ;; TODO: support octave shift modifier
                   ;; TODO: support natural modifier (after supporting key
                   ;; signature)
                   (let ((values (if (eq? type 'note)
