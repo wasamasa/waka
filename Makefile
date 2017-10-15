@@ -1,12 +1,12 @@
 KAWAC = kawa --main -C
 SOURCE = waka.scm
-MAINCLASS = waka.class
+MAINCLASS = waka
 JAR = waka.jar
 RM = rm -rf
 UNZIP = unzip -q
 
-KAWAJAR ?= kawa.jar
-JLINEJAR ?= jline3.jar
+KAWAJAR ?= /usr/share/kawa/lib/kawa.jar
+JLINEJAR ?= /usr/share/java/jline3.jar
 JARS = $(KAWAJAR) $(JLINEJAR)
 
 .PHONY: unjar clean
@@ -17,15 +17,13 @@ all: waka.jar
 	$(KAWAC) $<
 
 manifest.txt:
-	@echo "Manifest-Version: 1.0" > manifest.txt
-	@echo "Main-Class: waka" >> manifest.txt
-	@echo "" >> manifest.txt
+	@printf 'Manifest-Version: 1.0\nMain-Class: $(MAINCLASS)\n\n' > manifest.txt
 
-unjar: $(KAWAJAR) $(JLINEJAR)
+unjar: $(JARS)
 	$(UNZIP) $(KAWAJAR) -x 'META-INF/*' -d tmp/
 	$(UNZIP) $(JLINEJAR) -x 'META-INF/*' -d tmp/
 
-waka.jar: manifest.txt $(MAINCLASS) unjar
+waka.jar: manifest.txt $(MAINCLASS).class unjar
 	jar -cmf manifest.txt $(JAR) *.class -C tmp gnu -C tmp kawa -C tmp org
 
 clean:
