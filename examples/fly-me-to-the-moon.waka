@@ -1,20 +1,19 @@
 main:
   # taken from https://www.scribd.com/doc/42170117/Fly-Me-to-the-Moon-Music-Sheet
-
-  # TODO: add backing track with chords
+  # key signature: a- b- e-
 
   o6 e4.- d8 c < b- | a4.- b8- > c e- | d4.   c8 < b- a- | g2.
   #  Fly  me to  the  moon and let me   play  a-mong  the  stars.
   o6 c4. < b8- a-  g |  f4.    g8 a- > c | < b4. a8- g   f | e2-   e4
   #  Let   me  see what spring is like on    Ju- pi- ter and Mars. In
-  o5 f8 > c  c2.   e4-  d | < b2~1~2- d4 | e8- a- a2~1-
+  o5 f8 > c  c2.   e4-  d | < b2~4~2- d4 | e8- a- a2~4-
   #  oth- er words hold my    hand!   In   oth-er words
   o6 c4 < b- | a-   g1 r4 | > e.-  d8 c <   b- | a4.- b8- > c   e-
   #  dar- ling kiss me!       Fill my heart with song and   let me
   o6 d4.  c8 < b- a- | g2. > c4. < b8- a-  g | f4.  g8  a- > c8 | < b4. a8-  g   f
   #  sing for- ev-er   more. You   are all I   long for all  I      wor-ship and a-
-  o5 e2-. | e4 f8 >  c  c2~1  e4-    d | < b2~1~2- b4
-  #  dore.  In oth-  er words please be    true!   In
+  o5 e2-   e4 | f8 >  c  c2~4  e4-    d | < b2~4~2- b4
+  #  dore. In   oth-  er words please be    true!   In
   o6 c8 < e- e2.-   e4- f  | e2.-
   #  oth- er words: I   love you!
 
@@ -22,13 +21,32 @@ main:
   #  Fly  me to  the  moon and let me   play  a-mong  the  stars.
   o6 c4. < b8- a-  g |  f4.    g8 a- > c | < b4. a8- g   f | e2-   e4
   #  Let   me  see what spring is like on    Ju- pi- ter and Mars. In
-  o5 f8 > c  c2.   e4-  d | < b2~1~2- d4 | e8- a- a2~1-
+  o5 f8 > c  c2.   e4-  d | < b2~4~2- d4 | e8- a- a2~4-
   #  oth- er words hold my    hand!   In   oth-er words
   o6 c4 < b- | a-   g1 r4 | > e.-  d8 c <   b- | a4.- b8- > c   e-
   #  dar- ling kiss me!       Fill my heart with song and   let me
   o6 d4.  c8 < b- a- | g2. > c4. < b8- a-  g | f4.  g8  a- > c8 | < b4. a8-  g   f
   #  sing for- ev-er   more. You   are all I   long for all  I      wor-ship and a-
-  o5 e2-. | e4 f8 >  c  c2~1  e4-    d     g2~1~2  e4-
-  #  dore.  In oth-  er words please be    true!   In
-  o6 f8   c  c2.    d4  f  | e2.-
+  o5 e2-   e4 | f8 >  c  c2~4  e4-    d     g2~4~2  e4-
+  #  dore. In   oth-  er words please be    true!   In
+  o6 f8   c  c2.    d4  f  | e2~4~2-
   #  oth- er words: I   love you!
+
+# TODO: add backing track with chords
+
+backing:
+  o2 c4 g2 | f4 > c2 | < b4- < b- > b- | c2.
+  o2 a4- > e2- | d4 < a2- | g4 < g > g | c g > c
+  o2 f4 > f c | < f > c < b- | e- > e- < b- | e- b- g | f > f c
+  o2 g4 < b- > g | a- e- b- | d a g | c g2 | f4 > c2
+  o2 b- < b- > b- | e2.- | a4- > e2- | d4 < a2- | g4 < g > g
+  o2 c4 g > c | < a- > f c | < a- > c < b- | < b- > f b- | > c < g e
+  o2 f4 > f c | < f > c < b- | e- > e- < b- | g d < b
+
+  o2 c4 g2 | f4 > c2 | < b4- < b- > b- | c2.
+  o2 a4- > e2- | d4 < a2- | g4 < g > g | c g > c
+  o2 f4 > f c | < f > c < b- | e- > e- < b- | e- b- g | f > f c
+  o2 g4 < b- > g | a- e- b- | d a g | c g2 | f4 > c2
+  o2 b- < b- > b- | e2.- | a4- > e2- | d4 < a2- | g4 < g > g
+  o2 c4 g > c | < a- > f c | < a- > c < b-
+  o2 e4- b- > e- | < e- b- > e- | < a- e- < a- | b- > b- < d | e- > e- < b- | e2.-
