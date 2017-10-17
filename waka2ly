@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -e
+
+midifile=$(mktemp)
+trap "rm -f $midifile" EXIT
+
+if [[ -n "$1" && -n "$2" ]]; then
+    waka "$1" "$midifile"
+    midi2ly -d 32 "$midifile" -o "$2"
+else
+    printf 'usage: %s <infile> <outfile> [opts]\n' "$0"
+    exit 1
+fi

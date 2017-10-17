@@ -47,6 +47,15 @@ If you're experiencing issues such as static noise under Pulseaudio,
 you can temporarily suspend it with ``pasuspender -- env PULSE_SERVER=
 waka``.
 
+Debugging
+---------
+
+While listening carefully to the notes is the easiest way to spot
+mistakes, it may not be sufficient if you aren't sure about whether
+the right notes have been generated.  The bundled ``waka2ly`` script
+leverages Lilypond to generate a file that can be typeset with
+``lilypond`` for visual debugging.
+
 .. _Kawa: https://www.gnu.org/software/kawa/
 .. _JLine3: https://github.com/jline/jline3
 .. _javax.sound.midi: https://docs.oracle.com/javase/7/docs/api/javax/sound/midi/package-summary.html
