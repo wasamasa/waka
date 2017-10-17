@@ -1,2 +1,6 @@
 *.class
+*.jar
 *.log
+manifest.txt
+examples/*.midi
+tmp/

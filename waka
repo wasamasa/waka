@@ -1,4 +1,5 @@
 #!/usr/bin/env kawa
+;; -*- mode: scheme; -*-
 
 (import (scheme base))
 (import (scheme char))
@@ -67,8 +68,8 @@
 (define channel #f)
 (define velocity #f)
 (define soundbank #f)
-;; TODO: allow another customizable for instrument aliases
-;; NOTE: http://www.jimmenard.com/midi_ref.html#General_MIDI
+;; TODO: make use of this
+(include "instruments.scm")
 (define instruments #f)
 (define instrument-id #f)
 (define instrument #f)
@@ -542,7 +543,7 @@
                (case type
                  ((note chord)
                   ;; TODO: support natural modifier (after supporting key
-                  ;; signature)
+                  ;; signatures)
                   (let ((values (if (eq? type 'note)
                                     (list value)
                                     (map cdr value)))
@@ -830,4 +831,11 @@
 ;; TODO: check other alda syntax that's worth implementing (like
 ;; duration in ms/s)
 ;; TODO: add auto-completion for sexps
+;; NOTE: you'd either have the case of the cursor being after "("
+;; (offer all known s-expressions), after "(foo" (offer all possible
+;; s-expressions) or after "(foo " (offer every valid argument for
+;; that s-expression)
+;; NOTE: generally strings complicate the situation, inside a string
+;; you should only allow for file completion (and to detect it
+;; properly, change the quote chars)
 ;; TODO: add debug mode
