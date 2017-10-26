@@ -8,6 +8,8 @@ trap "rm -f $midifile" EXIT
 if [[ -n "$1" && -n "$2" ]]; then
     waka "$1" "$midifile"
     midi2ly $MIDI2LY_OPTS -d 32 "$midifile" -o "$2"
+    # lilypond will otherwise emit MIDI additionally to a PDF
+    sed -i '/\\midi *{ *}/d' "$2"
 else
     printf 'usage: %s <infile> <outfile> [opts]\n' "$0"
     exit 1
