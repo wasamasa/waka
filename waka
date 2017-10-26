@@ -648,6 +648,7 @@
     (let loop ()
       (let ((byte (Reader:read reader)))
         (case byte
+          ((3) (loop)) ; C-c
           ((4) (newline) #f) ; EOF
           ((10 13) (newline) (display-octave last-octave) (loop)) ; CR/LF
           ((0) (newline) (repl)) ; C-SPC
