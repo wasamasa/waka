@@ -205,6 +205,24 @@
 
 ;;; parsing
 
+(define (alist-put! key value alist)
+  ;; TODO: replace with more appropriate check after implementing nicknames
+  (let ((pair (assoc key alist)))
+    (if pair
+        (begin
+          (set-cdr! pair (append (cdr pair) value))
+          alist)
+        (cons (cons key value) alist))))
+
+(define (group-asts asts)
+  (let loop ((asts asts)
+             (acc '()))
+    (if (pair? asts)
+        (let ((item (car asts)))
+          (loop (cdr asts)
+                (alist-put! (car item) (cdr item) acc)))
+        (reverse acc))))
+
 (define-record-type token-port
   (make-token-port tokens)
   token-port?
@@ -301,7 +319,7 @@
           (let ((sequence (parse-sequence token-port #f)))
             (if (not sequence)
                 (error "Expected a sequence")
-                sequence))
+                (cons name sequence)))
           #f)))
   (define (name-token? token)
     (and (string? token)
@@ -493,8 +511,9 @@
     (when (null? tokens)
       (error "Empty input"))
     (if score?
-        (parse-score token-port)
-        (list (parse-sequence token-port #t)))))
+        (group-asts (parse-score token-port))
+        ;; FIXME: using "main" as name is wrong
+        (group-asts (list (cons "main" (parse-sequence token-port #t)))))))
 
 ;; adapted from
 ;; http://archive.oreilly.com/pub/a/onjava/excerpt/jenut3_ch17/index1.html
@@ -524,7 +543,9 @@
     (for-each
      (lambda (sexps)
        (let ((track (sequence:createTrack))
-             (last-dotted #f))
+             (last-dotted #f)
+             ;; FIXME: make use of this
+             (name (car sexps)))
          ;; TODO: send instrument change message for multi-instrument support
          ;; NOTE: changing the instrument seems to only work for the synth
          ;; or a channel, so you'd need to stop hardcoding channel 0,
@@ -533,7 +554,7 @@
          ;; available free general/percussion channel
          ;; NOTE: consider changing track name syntax to instrument number
          ;; (how would you do percussion then?)
-         (let loop ((sexps sexps)
+         (let loop ((sexps (cdr sexps))
                     (t 0)
                     (last-duration default-duration))
            (when (pair? sexps)
@@ -630,8 +651,8 @@
                     (loop (cdr sexps) t last-duration)))
                  (else
                   (error "Unimplemented item type" type))))))))
-       tracks)
-     sequence))
+     tracks)
+    sequence))
 
 ;;; play modes
 
@@ -827,6 +848,7 @@
           (apply record-midi! argv)
           (quit!)))))))
 
+;; TODO: implement a nickname/identifier syntax for the main/backing case
 ;; TODO: add subsequence syntax (like { ... })
 ;; TODO: add syntax for repeating notes/subsequences
 ;; TODO: check other alda syntax that's worth implementing (like
