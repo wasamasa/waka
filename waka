@@ -7,8 +7,8 @@
 (import (scheme write))
 (import (srfi 1))
 
-(import (class gnu.text SyntaxException))
 (import (class java.io File FileInputStream Reader))
+(import (class java.lang Exception))
 (import (class javax.sound.midi
                Instrument MetaMessage MidiChannel
                MidiEvent MidiFileFormat MidiSystem
@@ -715,10 +715,11 @@
       (display (make-string indent #\space))
       (display (make-string (max (- width indent) 1) #\^))
       (newline)))
-   ((read-error? ex)
+   ((or (read-error? ex) (file-error? ex))
     (display "Error: ")
-    (display (SyntaxException:getMessage ex))
-    (flush-output-port))
+    (print (Exception:getMessage ex))
+    (quit!)
+    (exit 1))
    ((error-object? ex)
     (display "Error: ")
     (display (error-object-message ex))
@@ -766,11 +767,12 @@
 
 (define (play-file! path)
   (guard
-   ;; TODO: handle file-related errors
    (ex ((or (parse-error-object? ex)
             (read-error? ex)
+            (file-error? ex)
             (error-object? ex))
-        (newline)
+        (when (not (file-error? ex))
+          (newline))
         (handle-errors ex)))
    (if (midi-file? path)
        (play-midi-file! path)
