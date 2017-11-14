@@ -152,38 +152,63 @@
 
 (test-begin "scores")
 
-(let ((linear-score "main:    o4 c1   d e f g a b > c
-                     backing: o4 c1 < b a g f e d < c")
-      (split-score "main:    o4 c1   d e f
-                    backing: o4 c1 < b a g
-                    main:    g a b > c
-                    backing: f e d < c")
-      (ast '(("main"
-              (octave . 4)
-              (note (key . #\c)
-                    (duration . 1))
-              (note (key . #\d))
-              (note (key . #\e))
-              (note (key . #\f))
-              (note (key . #\g))
-              (note (key . #\a))
-              (note (key . #\b))
-              (octave-shift . 1)
-              (note (key . #\c)))
-             ("backing"
-              (octave . 4)
-              (note (key . #\c)
-                    (duration . 1))
-              (octave-shift . -1)
-              (note (key . #\b))
-              (note (key . #\a))
-              (note (key . #\g))
-              (note (key . #\f))
-              (note (key . #\e))
-              (note (key . #\d))
-              (octave-shift . -1)
-              (note (key . #\c))))))
+(test-error (parse ": c" #t))
+(test-error-message "Expected instrument" (parse ": c" #t))
+
+(test-error (parse "foo:: c" #t))
+(test-error-message "Expected nickname" (parse "foo:: c" #t))
+
+(test-error (parse "foo:bar:baz c" #t))
+(test-error-message "Expected at least one track" (parse "foo:bar:baz c" #t))
+
+(test-error (parse "foo:bar:baz: c" #t))
+(test-error-message "Trailing garbage" (parse "foo:bar:baz: c" #t))
+
+(test-error (parse "foo: bar" #t))
+(test-error-message "Trailing garbage" (parse "foo: bar" #t))
+
+(let* ((linear-score "main:    o4 c1   d e f g a b > c
+                      backing: o4 c1 < b a g f e d < c")
+       (split-score "main:    o4 c1   d e f
+                     backing: o4 c1 < b a g
+                     main:    g a b > c
+                     backing: f e d < c")
+       (nickname-score "piano:main:    o4 c1   d e f g a b > c
+                        piano:backing: o4 c1 < b a g f e d < c")
+       (split-nickname-score "piano:main:    o4 c1   d e f
+                              piano:backing: o4 c1 < b a g
+                              piano:main:    g a b > c
+                              piano:backing: f e d < c")
+       (ast '(("main"
+               (octave . 4)
+               (note (key . #\c)
+                     (duration . 1))
+               (note (key . #\d))
+               (note (key . #\e))
+               (note (key . #\f))
+               (note (key . #\g))
+               (note (key . #\a))
+               (note (key . #\b))
+               (octave-shift . 1)
+               (note (key . #\c)))
+              ("backing"
+               (octave . 4)
+               (note (key . #\c)
+                     (duration . 1))
+               (octave-shift . -1)
+               (note (key . #\b))
+               (note (key . #\a))
+               (note (key . #\g))
+               (note (key . #\f))
+               (note (key . #\e))
+               (note (key . #\d))
+               (octave-shift . -1)
+               (note (key . #\c)))))
+       (nickname-ast (map (lambda (sequence) (cons "piano" (cdr sequence)))
+                          ast)))
   (test-equal ast (parse linear-score #t))
-  (test-equal ast (parse split-score #t)))
+  (test-equal ast (parse split-score #t))
+  (test-equal nickname-ast (parse nickname-score #t))
+  (test-equal nickname-ast (parse nickname-score #t)))
 
 (test-end "scores")

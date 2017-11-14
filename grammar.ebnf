@@ -9,7 +9,10 @@ token = "[^[:space:]|;(]+" .
 
 score = track+ .
 track = name sequence .
-name = alnum+ ":" .
+name = instrument [ ":" nickname ] ":" .
+instrument = identifier .
+nickname = identifier .
+identifier = alnum+ .
 sequence = item+ .
 item = chord | rest | octave | shift | sexp .
 chord = note { "/" note } .

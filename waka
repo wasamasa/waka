@@ -205,14 +205,16 @@
 
 ;;; parsing
 
-(define (alist-put! key value alist)
-  ;; TODO: replace with more appropriate check after implementing nicknames
-  (let ((pair (assoc key alist)))
+(define (alist-put! key value alist test)
+  (let ((pair (assoc key alist test)))
     (if pair
         (begin
           (set-cdr! pair (append (cdr pair) value))
           alist)
         (cons (cons key value) alist))))
+
+(define (ast-name-equal? a b)
+  (equal? (last a) (last b)))
 
 (define (group-asts asts)
   (let loop ((asts asts)
@@ -220,8 +222,12 @@
     (if (pair? asts)
         (let ((item (car asts)))
           (loop (cdr asts)
-                (alist-put! (car item) (cdr item) acc)))
-        (reverse acc))))
+                (alist-put! (car item) (cdr item) acc ast-name-equal?)))
+        (map
+         (lambda (item)
+           (let ((instrument (car (car item))))
+             (cons instrument (cdr item))))
+         (reverse acc)))))
 
 (define-record-type token-port
   (make-token-port tokens)
@@ -329,15 +335,33 @@
         (call-with-input-string (read-token token-port) read-name)
         #f))
   (define (read-name port)
+    (when (eqv? (peek-char port) #\:)
+      (parse-error port (last-token) "Expected instrument"))
+    (let ((instrument (read-instrument port)))
+      (read-char port) ; skip #\:
+      (if (eof-object? (peek-char port))
+          (list instrument)
+          (let ((nickname (read-nickname port)))
+            (read-char port) ; skip #\:
+            (cond
+             ((not (eof-object? (peek-char port)))
+              (parse-error port (last-token) "Trailing garbage"))
+             ((not nickname)
+              (parse-error port (last-token) "Expected nickname"))
+             (else
+              (list instrument nickname)))))))
+  (define (read-identifier port)
     (let loop ((chars '()))
       (let ((char (peek-char port)))
         (if (or (char-upper-case? char)
                 (char-lower-case? char)
                 (char-numeric? char))
             (loop (cons (read-char port) chars))
-            (if (or (null? chars) (not (eqv? (peek-char port) #\:)))
+            (if (or (null? chars) (eof-object? (peek-char port)))
                 #f
                 (list->string (reverse chars)))))))
+  (define read-instrument read-identifier)
+  (define read-nickname read-identifier)
   (define (parse-sequence token-port top-level?)
     (let loop ((items '()))
       (let ((item (parse-item token-port)))
@@ -512,8 +536,9 @@
       (error "Empty input"))
     (if score?
         (group-asts (parse-score token-port))
-        ;; FIXME: using "main" as name is wrong
-        (group-asts (list (cons "main" (parse-sequence token-port #t)))))))
+        ;; FIXME: using "main" as name is wrong, it should be the
+        ;; default instrument instead
+        (group-asts (list (cons '("main") (parse-sequence token-port #t)))))))
 
 ;; adapted from
 ;; http://archive.oreilly.com/pub/a/onjava/excerpt/jenut3_ch17/index1.html
@@ -860,7 +885,6 @@
           (apply record-midi! argv)
           (quit!)))))))
 
-;; TODO: implement a nickname/identifier syntax for the main/backing case
 ;; TODO: add subsequence syntax (like { ... })
 ;; TODO: add syntax for repeating notes/subsequences
 ;; TODO: check other alda syntax that's worth implementing (like
