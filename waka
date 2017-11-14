@@ -21,6 +21,8 @@
 
 ;;; utils
 
+(define test-mode? (get-environment-variable "RUN_TESTS"))
+
 (define (print . items)
   (for-each (lambda (item) (display item) (newline)) items))
 
@@ -51,15 +53,20 @@
       (with-input-from-file user-config-path read)
       '()))
 
-(define user-base-octave (alist-ref 'base-octave user-config))
-(define user-initial-mode (alist-ref 'initial-mode user-config))
-(define user-instrument-id (alist-ref 'default-instrument-id user-config))
-(define user-map (alist-ref 'map user-config))
-(define user-prompt (alist-ref 'prompt user-config))
-(define user-soundbank-path (alist-ref 'soundbank user-config))
-(define user-velocity (alist-ref 'default-velocity user-config))
-(define user-bpm (alist-ref 'default-bpm user-config))
-(define user-quantization (alist-ref 'default-quantization user-config))
+(define (user-setting key)
+  (if test-mode?
+      #f
+      (alist-ref key user-config)))
+
+(define user-base-octave (user-setting 'base-octave))
+(define user-initial-mode (user-setting 'initial-mode))
+(define user-instrument-id (user-setting 'default-instrument-id))
+(define user-map (user-setting 'map))
+(define user-prompt (user-setting 'prompt))
+(define user-soundbank-path (user-setting 'soundbank))
+(define user-velocity (user-setting 'default-velocity))
+(define user-bpm (user-setting 'default-bpm))
+(define user-quantization (user-setting 'default-quantization))
 
 (define synthesizer #f)
 (define sequencer #f)
@@ -863,7 +870,7 @@
     (format "usage:\n  ~a # repl\n  ~a <infile> # batch play\n  ~a <infile> <outfile> # batch write"
             program program program)))
 
-(if (get-environment-variable "RUN_TESTS")
+(if test-mode?
     (include "test.scm")
     (let ((argv (cdr (command-line))))
       (cond
