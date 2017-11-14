@@ -210,6 +210,23 @@
                   (else (error "Invalid note")))))
     (+ (* (+ octave 1) 12) offset)))
 
+(define (check-instrument-id id)
+  (when (or (< id 0) (> id (as Instrument[] instruments):length))
+    (error "Instrument ID out of bounds"))
+  id)
+
+;; TODO: use this to look up instrument by default id
+(define (->instrument-id arg)
+  (cond
+   ((number? arg)
+    (check-instrument-id arg))
+   ((and (string? arg) (string->number arg))
+    => check-instrument-id)
+   ((and (string? arg) (alias->instrument-id (string->symbol arg)))
+    => check-instrument-id)
+   (else
+    (error "Unknown instrument"))))
+
 ;;; parsing
 
 (define (alist-put! key value alist test)
