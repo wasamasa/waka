@@ -37,5 +37,6 @@
       (#\o . 26)
       (#\0 . 27)
       (#\p . 28))
+ (play-timeout . #f)
  (prompt . "> ")
  (soundbank . "/usr/share/soundfonts/FluidR3_GM.sf2"))

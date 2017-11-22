@@ -67,6 +67,7 @@
 (define user-velocity (user-setting 'default-velocity))
 (define user-bpm (user-setting 'default-bpm))
 (define user-quantization (user-setting 'default-quantization))
+(define user-play-timeout (user-setting 'play-timeout))
 
 (define synthesizer #f)
 (define sequencer #f)
@@ -711,6 +712,18 @@
     (display octave)
     (display " ")
     (flush-output-port))
+  (define (timeout->seconds timeout)
+    (/ bpm 60 timeout))
+  (define (timeouts->seconds timeouts)
+    (fold + 0 (map timeout->seconds timeouts)))
+  (define last-note (make-parameter #f))
+  (define (silence-with-timeout channel note duration)
+    (future
+     ;; NOTE: a plain let-binding won't suffice because the value
+     ;; after sleep will be different
+     (parameterize ((last-note note))
+       (sleep duration)
+       (MidiChannel:noteOff channel (last-note)))))
   (print "Free play mode entered, toggle with C-SPC")
   (display-octave base-octave)
   (let ((reader (Terminal:reader terminal))
@@ -741,6 +754,12 @@
                   (octave (and midi-note (midi-note-octave midi-note))))
              (when midi-note
                (MidiChannel:noteOn channel midi-note velocity)
+               (when user-play-timeout
+                 (let ((timeouts (if (pair? user-play-timeout)
+                                     user-play-timeout
+                                     (list user-play-timeout))))
+                   (silence-with-timeout channel midi-note
+                                         (timeouts->seconds timeouts))))
                (cond
                 ((> octave last-octave)
                  (display (string-repeat "> " (- octave last-octave))))
