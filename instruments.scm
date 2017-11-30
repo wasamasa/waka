@@ -1,5 +1,3 @@
-(import (rnrs hashtables))
-
 (define instrument-aliases (make-eq-hashtable))
 
 (define (alias->instrument-id alias)

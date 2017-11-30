@@ -6,6 +6,7 @@
 (import (scheme read))
 (import (scheme write))
 (import (srfi 1))
+(import (rnrs hashtables))
 
 (import (class java.io File FileInputStream Reader))
 (import (class java.lang Exception))
@@ -60,7 +61,7 @@
 
 (define user-base-octave (user-setting 'base-octave))
 (define user-initial-mode (user-setting 'initial-mode))
-(define user-instrument-id (user-setting 'default-instrument-id))
+(define user-instrument (or (user-setting 'default-instrument) 0))
 (define user-map (user-setting 'map))
 (define user-prompt (user-setting 'prompt))
 (define user-soundbank-path (user-setting 'soundbank))
@@ -72,15 +73,12 @@
 (define synthesizer #f)
 (define sequencer #f)
 (define channels #f)
-(define channel-id 0)
-(define channel #f)
 (define velocity #f)
 (define soundbank #f)
-;; TODO: make use of this
 (include "instruments.scm")
 (define instruments #f)
-(define instrument-id #f)
-(define instrument #f)
+(define user-instrument-id #f)
+(define user-channel-id 0)
 (define default-duration 4)
 (define base-octave #f)
 (define resolution 16) ;; ticks per quarter
@@ -107,7 +105,6 @@
     (transmitter:setReceiver receiver))
 
   (set! channels (Synthesizer:getChannels synthesizer))
-  (set! channel (channels channel-id))
   (set! velocity (or user-velocity 64))
   (set! base-octave (or user-base-octave 4))
   (set! bpm (or user-bpm 120))
@@ -117,20 +114,7 @@
         (if user-soundbank-path
             (MidiSystem:getSoundbank (File (as String user-soundbank-path)))
             (Synthesizer:getDefaultSoundbank synthesizer)))
-
   (set! instruments (Soundbank:getInstruments soundbank))
-  (set! instrument-id (or user-instrument-id 0))
-  (set! instrument
-        (if (< instrument-id (as Instrument[] instruments):length)
-            (instruments instrument-id)
-            (begin
-              (print "Out of bounds, falling back to instrument zero...")
-              (instruments 0))))
-
-  (Synthesizer:loadInstrument synthesizer instrument)
-  ;; NOTE: without this line the instrument isn't actually used...
-  ;; TODO: make it a per-channel thing
-  (MidiChannel:programChange channel instrument-id)
 
   (print "Done!"))
 
@@ -212,21 +196,45 @@
     (+ (* (+ octave 1) 12) offset)))
 
 (define (check-instrument-id id)
-  (when (or (< id 0) (> id (as Instrument[] instruments):length))
+  (when (or (< id -1) (> id (as Instrument[] instruments):length))
     (error "Instrument ID out of bounds"))
   id)
 
-;; TODO: use this to look up instrument by default id
 (define (->instrument-id arg)
   (cond
    ((number? arg)
     (check-instrument-id arg))
+   ((and (symbol? arg) (alias->instrument-id arg))
+    => check-instrument-id)
    ((and (string? arg) (string->number arg))
     => check-instrument-id)
    ((and (string? arg) (alias->instrument-id (string->symbol arg)))
     => check-instrument-id)
    (else
     (error "Unknown instrument"))))
+
+(define (sequence-instruments sequence)
+  (append-map
+   (lambda (sexps)
+     (cons (car sexps)
+           (filter-map
+            (lambda (sexp)
+              (and (eqv? (car sexp) 'sexp)
+                   (eqv? (cadr sexp) 'instrument)
+                   (->instrument-id (caddr sexp))))
+            (cdr sexps))))
+   sequence))
+
+(define loaded-instruments (make-eqv-hashtable))
+
+(define (load-instrument! id)
+  (when (and (> id -1)
+             (not (hashtable-contains? loaded-instruments id)))
+    (Synthesizer:loadInstrument synthesizer (instruments id))
+    (hashtable-set! loaded-instruments id #t)))
+
+(define (load-sequence-instruments! sequence)
+  (for-each load-instrument! (sequence-instruments sequence)))
 
 ;;; parsing
 
@@ -362,7 +370,8 @@
   (define (read-name port)
     (when (eqv? (peek-char port) #\:)
       (parse-error port (last-token) "Expected instrument"))
-    (let ((instrument (read-instrument port)))
+    (let* ((instrument (read-instrument port))
+           (instrument (if instrument (->instrument-id instrument) #f)))
       (read-char port) ; skip #\:
       (if (eof-object? (peek-char port))
           (list instrument)
@@ -561,14 +570,27 @@
       (error "Empty input"))
     (if score?
         (group-asts (parse-score token-port))
-        ;; FIXME: using "main" as name is wrong, it should be the
-        ;; default instrument instead
-        (group-asts (list (cons '("main") (parse-sequence token-port #t)))))))
+        (group-asts `(((,user-instrument-id)
+                       ,@(parse-sequence token-port #t)))))))
 
 ;; adapted from
 ;; http://archive.oreilly.com/pub/a/onjava/excerpt/jenut3_ch17/index1.html
 
 (define (sequence->midi tracks)
+  (define (next-id! initial-ids error-message)
+    (let ((available-ids initial-ids))
+      (lambda ()
+        (if (pair? available-ids)
+            (let ((id (car available-ids)))
+              (set! available-ids (cdr available-ids))
+              id)
+            (error error-message)))))
+  (define next-channel-id!
+    ;; NOTE: this intentionally omits percussion channel 9
+    (next-id! '(0 1 2 3 4 5 6 7 8 10 11 12 13 14 15)
+              "No more channel IDs left"))
+  (define next-percussion-channel-id!
+    (next-id! '(9) "No more percussion channel IDs left"))
   (define (duration->ticks duration #!optional dotted)
     (let ((ticks (if (pair? duration)
                      (durations->ticks duration)
@@ -579,31 +601,31 @@
   (define (durations->ticks durations)
     (fold + 0 (map (lambda (duration) (/ (* resolution 4) duration))
                    durations)))
-  (define (add-note-on track start key velocity)
+  (define (add-note-on track channel-id start key velocity)
     (let ((note (ShortMessage)))
       (note:setMessage ShortMessage:NOTE_ON channel-id key velocity)
       (Track:add track (MidiEvent note start))))
-  (define (add-silent-note track start key)
-    (add-note-on track start key 0))
-  (define (add-note track start length key velocity)
-    (add-note-on track start key velocity)
+  (define (add-silent-note track channel-id start key)
+    (add-note-on track channel-id start key 0))
+  (define (add-note track channel-id start length key velocity)
+    (add-note-on track channel-id start key velocity)
     (let ((end (+ start (exact (round (* quantization length))))))
-      (add-silent-note track end key)))
+      (add-silent-note track channel-id end key)))
+  (define (add-program-change track channel-id start instrument-id)
+    (let ((msg (ShortMessage)))
+      (msg:setMessage ShortMessage:PROGRAM_CHANGE channel-id instrument-id 0)
+      (Track:add track (MidiEvent msg start))))
   (let ((sequence (Sequence Sequence:PPQ resolution)))
     (for-each
      (lambda (sexps)
-       (let ((track (sequence:createTrack))
-             (last-dotted #f)
-             ;; FIXME: make use of this
-             (name (car sexps)))
-         ;; TODO: send instrument change message for multi-instrument support
-         ;; NOTE: changing the instrument seems to only work for the synth
-         ;; or a channel, so you'd need to stop hardcoding channel 0,
-         ;; start using more than one channel and treat channel 9 specially
-         ;; NOTE: you could have a procedure returning the next
-         ;; available free general/percussion channel
-         ;; NOTE: consider changing track name syntax to instrument number
-         ;; (how would you do percussion then?)
+       (let* ((track (sequence:createTrack))
+              (last-dotted #f)
+              (instrument-id (car sexps))
+              (channel-id (if (< instrument-id 0)
+                              (next-percussion-channel-id!)
+                              (next-channel-id!))))
+         (when (>= instrument-id 0)
+           (add-program-change track channel-id 0 instrument-id))
          (let loop ((sexps (cdr sexps))
                     (t 0)
                     (last-duration default-duration))
@@ -643,7 +665,7 @@
                          (let* ((duration (or duration last-duration))
                                 (dotted (or dotted last-dotted))
                                 (ticks (duration->ticks duration dotted)))
-                           (add-note track t ticks (+ note shift) velocity)
+                           (add-note track channel-id t ticks (+ note shift) velocity)
                            (set! last-dotted dotted)
                            (if chord-ticks
                                (when (< ticks chord-ticks)
@@ -663,7 +685,7 @@
                     ;; NOTE: this will only work if the rest is the last
                     ;; thing in the score
                     (when (null? (cdr sexps))
-                      (add-silent-note track (+ t ticks) 0))
+                      (add-silent-note track channel-id (+ t ticks) 0))
                     (loop (cdr sexps) (+ t ticks) duration)))
                  ((octave)
                   (set! base-octave value)
@@ -679,10 +701,8 @@
                   (let ((type (car value))
                         (value (cdr value)))
                     (case type
-                      ;; TODO: instrument (create instrument change procedure)
                       ;; TODO: sustain (implement that feature first)
                       ;; TODO: dampening pedal (see above)
-                      ;; TODO: allow setting midi metadata with sexps
                       ;; TODO: per track vs global settings (velocity?)
                       ((velocity)
                        (if (null? value)
@@ -696,6 +716,10 @@
                        (if (null? value)
                            (print quantization)
                            (set! quantization (car value))))
+                      ((instrument)
+                       (if (null? value)
+                           (print user-instrument-id)
+                           (change-instrument! (car value))))
                       (else
                        (error "Unknown sexp type" type)))
                     (loop (cdr sexps) t last-duration)))
@@ -727,7 +751,8 @@
   (print "Free play mode entered, toggle with C-SPC")
   (display-octave base-octave)
   (let ((reader (Terminal:reader terminal))
-        (last-octave base-octave))
+        (last-octave base-octave)
+        (channel (channels user-channel-id)))
     (let loop ()
       (let ((byte (Reader:read reader)))
         (case byte
@@ -819,7 +844,19 @@
              (Sequencer:start sequencer))
            (loop)))))))
 
+(define (change-instrument! instrument)
+  (let ((instrument-id (->instrument-id instrument)))
+    (set! user-instrument-id instrument-id)
+    (if (< instrument-id 0)
+        (set! user-channel-id 9)
+        (begin
+          (set! user-channel-id 0)
+          (load-instrument! instrument-id)
+          (MidiChannel:programChange (channels user-channel-id)
+                                     instrument-id)))))
+
 (define (run!)
+  (change-instrument! user-instrument)
   (if (eq? initial-mode 'repl)
       (repl)
       (free-play)))
@@ -902,6 +939,7 @@
           (sequence (parse input #t))
           (midi (sequence->midi sequence))
           (version (if (multi-track-sequence? sequence) 1 0)))
+     (load-sequence-instruments! sequence)
      (MidiSystem:write midi version (File out-path)))
    (print "Done!")))
 
@@ -938,6 +976,7 @@
 ;; TODO: add syntax for repeating notes/subsequences
 ;; TODO: check other alda syntax that's worth implementing (like
 ;; duration in ms/s)
+;; NOTE: duration could be done in an easier way with a (rest "1s") sexp
 ;; TODO: add auto-completion for sexps
 ;; NOTE: you'd either have the case of the cursor being after "("
 ;; (offer all known s-expressions), after "(foo" (offer all possible
