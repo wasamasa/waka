@@ -1,5 +1,5 @@
 ((base-octave . 3)
- (default-instrument-id . 4)
+ (default-instrument . piano)
  (default-velocity . 127)
  (default-bpm . 90)
  (default-quantization . 0.9)
