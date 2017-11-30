@@ -1,4 +1,4 @@
-main:
+electric-piano:
   # score stolen from https://www.youtube.com/watch?v=LVrLtvYHzKo
 
   (quantization 0.5)

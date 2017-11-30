@@ -1,2 +1,2 @@
-main: o4 c1 d e f g a b > c
-backing: o4 c1 < b a g f e d < c
+piano:main: o4 c1 d e f g a b > c
+piano:backing: o4 c1 < b a g f e d < c

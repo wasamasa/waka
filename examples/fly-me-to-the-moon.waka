@@ -3,61 +3,61 @@
 
 # TODO: add the other backing track with chords
 
-main:    o5 e4.- d8 c < b- | a4.- b8- > c e- |   d4.   c8 < b- a- | g2.
-#           Fly  me to  the  moon and let me     play  a-mong  the  stars.
-backing: o2 c4   g2        | f4 > c2         | < b4- < b- > b-    | c2.
+piano:main:    o5 e4.- d8 c < b- | a4.- b8- > c e- |   d4.   c8 < b- a- | g2.
+#                 Fly  me to  the  moon and let me     play  a-mong  the  stars.
+piano:backing: o2 c4   g2        | f4 > c2         | < b4- < b- > b-    | c2.
 
-main:    o5 c4. < b8- a-  g |  f4.    g8 a- > c | < b4. a8-  g  f | e2-   e4
-#           Let   me  see what spring is like on    Ju- pi- ter and Mars. In
-backing: o2 a4- > e2-       |  d4 < a2-         |   g4 < g > g    | c g > c
+piano:main:    o5 c4. < b8- a-  g |  f4.    g8 a- > c | < b4. a8-  g  f | e2-   e4
+#                 Let   me  see what spring is like on    Ju- pi- ter and Mars. In
+piano:backing: o2 a4- > e2-       |  d4 < a2-         |   g4 < g > g    | c g > c
 
-main:    o4 f8 > c  c2.       e4-  d | < b2~4~2- d4 | e8- a- a2~4-
-#           oth- er words     hold my    hand!   In   oth-er words
-backing: o2 f4 > f  c | < f > c < b- | e- > e- < b- | e- b- g | f > f c
+piano:main:    o4 f8 > c  c2.       e4-  d | < b2~4~2- d4 | e8- a- a2~4-
+#                 oth- er words     hold my    hand!   In   oth-er words
+piano:backing: o2 f4 > f  c | < f > c < b- | e- > e- < b- | e- b- g | f > f c
 
-main:    o5      c4 < b- | a-   g1 r4       | > e.-  d8 c <   b- | a4.- b8- > c   e-
-#           dar- ling kiss me!                  Fill my heart with song and   let me
-backing: o2 g4 < b- > g  | a- e- b- | d a g |   c g2             | f4 > c2
+piano:main:    o5      c4 < b- | a-   g1 r4       | > e.-  d8 c <   b- | a4.- b8- > c   e-
+#                 dar- ling kiss me!                  Fill my heart with song and   let me
+piano:backing: o2 g4 < b- > g  | a- e- b- | d a g |   c g2             | f4 > c2
 
-main:    o5 d4.  c8 < b- a- | g2.  | > c4. < b8- a-  g | f4.  g8  a- > c8 | < b4.  a8-  g   f
-#           sing for- ev-er   more.    You   are all I   long for all  I      wor-ship and a-
-backing: o2 b- < b- > b-    | e2.- |   a4- > e2-       | d4 < a2-         |   g4 < g > g
+piano:main:    o5 d4.  c8 < b- a- | g2.  | > c4. < b8- a-  g | f4.  g8  a- > c8 | < b4.  a8-  g   f
+#                 sing for- ev-er   more.    You   are all I   long for all  I      wor-ship and a-
+piano:backing: o2 b- < b- > b-    | e2.- |   a4- > e2-       | d4 < a2-         |   g4 < g > g
 
-main:    o4 e2-    e4 |   f8 > c  c2~4      e4-    d  | < b2~4~2-             b4
-#           dore.  In     oth- er words     please be     true!               In
-backing: o2 c4 g > c  | < a- > f c | < a- > c <    b- | < b- > f b- | > c < g e
+piano:main:    o4 e2-    e4 |   f8 > c  c2~4      e4-    d  | < b2~4~2-             b4
+#                 dore.  In     oth- er words     please be     true!               In
+piano:backing: o2 c4 g > c  | < a- > f c | < a- > c <    b- | < b- > f b- | > c < g e
 
-main:    o5 c8 < e- e2.-   e4- f    | e2.-         | r2~1
-#           oth- er words: I   love   you!
-backing: o2 f4 > f c | < f > c < b- | e- > e- < b- | g d < b
+piano:main:    o5 c8 < e- e2.-   e4- f    | e2.-         | r2~1
+#                 oth- er words: I   love   you!
+piano:backing: o2 f4 > f c | < f > c < b- | e- > e- < b- | g d < b
 
 # ---
 
-main:    o5 e4.- d8 c < b- | a4.- b8- > c e- |   d4.   c8 < b- a- | g2.
-#           Fly  me to  the  moon and let me     play  a-mong  the  stars.
-backing: o2 c4   g2        | f4 > c2         | < b4- < b- > b-    | c2.
+piano:main:    o5 e4.- d8 c < b- | a4.- b8- > c e- |   d4.   c8 < b- a- | g2.
+#                 Fly  me to  the  moon and let me     play  a-mong  the  stars.
+piano:backing: o2 c4   g2        | f4 > c2         | < b4- < b- > b-    | c2.
 
-main:    o5 c4. < b8- a-  g |  f4.    g8 a- > c | < b4. a8-  g  f | e2-   e4
-#           Let   me  see what spring is like on    Ju- pi- ter and Mars. In
-backing: o2 a4- > e2-       |  d4 < a2-         |   g4 < g > g    | c g > c
+piano:main:    o5 c4. < b8- a-  g |  f4.    g8 a- > c | < b4. a8-  g  f | e2-   e4
+#                 Let   me  see what spring is like on    Ju- pi- ter and Mars. In
+piano:backing: o2 a4- > e2-       |  d4 < a2-         |   g4 < g > g    | c g > c
 
-main:    o4 f8 > c  c2.      e4-  d | < b2~4~2- d4 | e8- a- a2~4-
-#           oth- er words    hold my    hand!   In   oth-er words
-backing: o2 f4 > f c | < f > c < b- | e- > e- < b- | e- b- g | f > f c
+piano:main:    o4 f8 > c  c2.      e4-  d | < b2~4~2- d4 | e8- a- a2~4-
+#                 oth- er words    hold my    hand!   In   oth-er words
+piano:backing: o2 f4 > f c | < f > c < b- | e- > e- < b- | e- b- g | f > f c
 
-main:    o5      c4 < b- | a-   g1 r4       | > e.-  d8 c <   b- | a4.- b8- > c   e-
-#           dar- ling kiss me!                  Fill my heart with song and   let me
-backing: o2 g4 < b- > g  | a- e- b- | d a g |   c g2             | f4 > c2
+piano:main:    o5      c4 < b- | a-   g1 r4       | > e.-  d8 c <   b- | a4.- b8- > c   e-
+#                 dar- ling kiss me!                  Fill my heart with song and   let me
+piano:backing: o2 g4 < b- > g  | a- e- b- | d a g |   c g2             | f4 > c2
 
-main:    o5 d4.  c8 < b- a- | g2.  | > c4. < b8- a-  g | f4.  g8  a- > c8 | < b4. a8-  g   f
-#           sing for- ev-er   more.    You   are all I   long for all  I      wor-ship and a-
-backing: o2 b- < b- > b-    | e2.- |   a4- > e2-       | d4 < a2-         | g4 < g > g
+piano:main:    o5 d4.  c8 < b- a- | g2.  | > c4. < b8- a-  g | f4.  g8  a- > c8 | < b4. a8-  g   f
+#                 sing for- ev-er   more.    You   are all I   long for all  I      wor-ship and a-
+piano:backing: o2 b- < b- > b-    | e2.- |   a4- > e2-       | d4 < a2-         | g4 < g > g
 
-main:    o4 e2-    e4 |   f8 > c  c2~4      e4-    d  | g2~4~2  e4-
-#           dore.  In     oth- er words     please be   true!    In
-backing: o2 c4 g > c  | < a- > f c | < a- > c <    b- | e4- b- > e-
+piano:main:    o4 e2-    e4 |   f8 > c  c2~4      e4-    d  | g2~4~2  e4-
+#                 dore.  In     oth- er words     please be   true!    In
+piano:backing: o2 c4 g > c  | < a- > f c | < a- > c <    b- | e4- b- > e-
 
-main:    o5 f8   c    c2.    d4   f      | e2~4~2-
-#           oth- er   words: I    love     you!
-backing: o2 a-   e- < a-  |  b- > b- < d | e- > e- < b- | e2.-
+piano:main:    o5 f8   c    c2.    d4   f      | e2~4~2-
+#                 oth- er   words: I    love     you!
+piano:backing: o2 a-   e- < a-  |  b- > b- < d | e- > e- < b- | e2.-
 
