@@ -14,7 +14,7 @@ You'll need to install the above dependencies first and make sure your
 Kawa installation has been built with JLine3 support.  If you're using
 Arch Linux, you can build and install the ``kawa-git`` and
 ``java-jline3`` packages from my `PKGBUILDs repository`_.  Copy
-``waka.scm`` to a location on your ``PATH`` and you're all set to go!
+``waka`` to a location on your ``PATH`` and you're all set to go!
 
 Usage
 -----
@@ -50,7 +50,7 @@ waka``.
 Language
 --------
 
-This is an informal summary of waka's grammar.  REPL mode accepts
+This is an informal summary of the grammar.  REPL mode accepts
 sequences whereas batch mode expects a superset of them known as a
 score.
 
