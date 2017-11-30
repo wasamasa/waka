@@ -196,7 +196,7 @@
     (+ (* (+ octave 1) 12) offset)))
 
 (define (check-instrument-id id)
-  (when (or (< id -1) (> id (as Instrument[] instruments):length))
+  (when (or (< id -1) (> id 127))
     (error "Instrument ID out of bounds"))
   id)
 
