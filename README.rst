@@ -47,6 +47,147 @@ If you're experiencing issues such as static noise under Pulseaudio,
 you can temporarily suspend it with ``pasuspender -- env PULSE_SERVER=
 waka``.
 
+Language
+--------
+
+This is an informal summary of waka's grammar.  REPL mode accepts
+sequences whereas batch mode expects a superset of them known as a
+score.
+
+Sequence
+........
+
+A sequence consists of (usually, but not always space-separated)
+items, the simplest of which is a note.  Other supported item types
+are chords (which themselves consist of notes), rests, octave changes,
+octave shifts and s-expressions.  The following plays the chromatic
+scale:
+
+.. code::
+
+   c1 d e f g a b
+
+To modify how a note is played, append characters to it.  A number is
+interpreted as a duration measured in fractions of a whole note, with
+the default duration being one-fourth.  Once set a duration is used
+for the subsequent notes until a new duration is specified this way:
+
+.. code::
+
+   c1 e g c2 e g c4 e g
+
+Durations themselves can be lengthened by appending one or more dots.
+Each dot increases the length of the note by 50%.
+
+.. code::
+
+   c2. c4
+
+Durations can be concatenated by using a tilde.  An alternative way of
+specifying ``c2..`` would be:
+
+.. code::
+
+   c2~4~8
+
+Accidentals change the pitch by a semitone.  ``+`` increases and
+``-`` decreases it.  Much like with dots, an arbitrary amount can be
+chained together.
+
+.. code::
+
+   c+ d+ f+ g+ a+
+
+Notes can be combined to a chord by concatenating them with a slash:
+
+.. code::
+
+   c1/e/g c/e-/g
+
+To change octaves in a chord, precede the note with as many ``<`` or
+``>`` needed.  ``<`` shifts down, ``>`` shifts up.
+
+.. code::
+
+   a1/>c/e e/c/<a
+
+The octave shift syntax can be used on its own to globally change the
+octave:
+
+.. code::
+
+   a1 > c e c < a
+
+The octave can be set with ``o`` to an absolute value:
+
+.. code::
+
+   o0 c1 o2 c o4 c o6 c o8 c
+
+Rests introduce a pause and use the same duration syntax as notes:
+
+.. code::
+
+   r1~2~4 r4
+
+Bars are considered whitespace
+
+.. code::
+
+   c1 | c2 c | c4 c c c
+
+The hash starts a line comment:
+
+.. code::
+
+   # ignore this
+
+S-expressions can represent all kinds of things.  The convention is
+to treat them like Scheme parameters or in other words, ``(foo)``
+returns the current value of ``foo`` whereas ``(foo bar)`` sets
+the value of ``foo`` to ``bar``.  Currently recognized s-expressions:
+
+.. code::
+
+   (velocity 127) # global velocity: 0 - 127
+   (tempo 180) # global speed in bpm
+   (bpm 180) # tempo alias
+   (quant 0.9) # fraction of a note to be played: 0.0 - 1.0
+   (quantize 0.9) # quant alias
+   (quantization 0.9) # quant alias
+   (instrument trumpet) # current instrument, see instruments.scm
+
+Score
+.........
+
+A score is a list of sequences, each preceded by a name suffixed by a
+colon.  Every sequence is played on a separate channel.  The name
+determines what instrument is used for the associated sequence.
+
+.. code::
+
+   piano: o4 c d e f g a b
+   trumpet: o3 c d e f g a b
+
+If you want to use the same instrument for more than one channel, you
+can append a nickname and another colon to the name.
+
+.. code::
+
+   piano:main:    o4 c d e f g a b
+   piano:backing: o3 c d e f g a b
+
+Scores can be split up into interleaved parts for easier editing.
+Make sure the names match up, otherwise they cannot be combined
+successfully:
+
+.. code::
+
+   piano:main:    o4 c d e f
+   piano:backing: o3 c d e f
+   piano:main:    o4 g a b > c
+   piano:backing: o3 g a b > c
+
 Debugging
 ---------
 
