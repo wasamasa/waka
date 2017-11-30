@@ -389,7 +389,8 @@
       (let ((char (peek-char port)))
         (if (or (char-upper-case? char)
                 (char-lower-case? char)
-                (char-numeric? char))
+                (char-numeric? char)
+                (memv char '(#\+ #\- #\_)))
             (loop (cons (read-char port) chars))
             (if (or (null? chars) (eof-object? (peek-char port)))
                 #f
