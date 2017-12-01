@@ -26,6 +26,11 @@ where you enter a sequence of notes and play them by pressing the
 mode and ``C-c`` in REPL mode, to exit press ``C-d``.  The grammar for
 sequences is adapted from Alda_ and documented in a `separate file`_.
 
+Both ``waka`` and MIDI files can be played back in batch mode by
+passing the file name as the only argument to ``waka``.  To batch
+convert from ``waka`` to MIDI, pass a ``waka`` file and a MIDI file as
+arguments to ``waka``.
+
 The settings can be customized by placing a file at
 ``$XDG_CONFIG_HOME/waka/config`` or if its unset,
 ``~/.config/waka/config``.  An `example file`_ containing all
