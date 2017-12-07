@@ -18,6 +18,8 @@
 (import (class org.jline.reader
                LineReader LineReaderBuilder
                EndOfFileException UserInterruptException))
+(import (class org.jline.reader.impl.completer StringsCompleter))
+(import (class org.jline.reader.impl DefaultParser))
 (import (class org.jline.terminal Terminal TerminalBuilder))
 
 ;;; utils
@@ -89,6 +91,12 @@
 (define terminal #f)
 (define reader #f)
 
+(define known-sexps
+  '(velocity
+    tempo bpm
+    quant quantize quantization
+    instrument))
+
 ;;; MIDI initialization
 ;; adapted from http://patater.com/gbaguy/javamidi.htm
 
@@ -138,6 +146,16 @@
         (let* ((builder (LineReaderBuilder:builder))
                (builder (builder:variable LineReader:HISTORY_FILE
                                           (File repl-history-path)))
+               (completer (apply StringsCompleter
+                                 (map symbol->string known-sexps)))
+               (builder (builder:completer completer))
+               (parser (object (DefaultParser)
+                         ((isDelimiterChar (buffer ::java.lang.CharSequence)
+                                           (pos ::int))::boolean
+                          (let ((char (buffer:charAt pos))
+                                (blacklist (string->list " \t\n`;|(")))
+                            (and (memv char blacklist) #t)))))
+               (builder (builder:parser parser))
                (builder (builder:terminal terminal)))
           (builder:build)))
 
@@ -701,6 +719,8 @@
                  ((sexp)
                   (let ((type (car value))
                         (value (cdr value)))
+                    (when (not (memq type known-sexps))
+                      (error "Unknown sexp type" type))
                     (case type
                       ;; TODO: sustain (implement that feature first)
                       ;; TODO: dampening pedal (see above)
@@ -721,8 +741,7 @@
                        (if (null? value)
                            (print user-instrument-id)
                            (change-instrument! (car value))))
-                      (else
-                       (error "Unknown sexp type" type)))
+                      (else (error "This shouldn't happen")))
                     (loop (cdr sexps) t last-duration)))
                  (else
                   (error "Unimplemented item type" type))))))))
@@ -977,13 +996,5 @@
 ;; TODO: add syntax for repeating notes/subsequences
 ;; TODO: check other alda syntax that's worth implementing (like
 ;; duration in ms/s)
-;; NOTE: duration could be done in an easier way with a (rest "1s") sexp
-;; TODO: add auto-completion for sexps
-;; NOTE: you'd either have the case of the cursor being after "("
-;; (offer all known s-expressions), after "(foo" (offer all possible
-;; s-expressions) or after "(foo " (offer every valid argument for
-;; that s-expression)
-;; NOTE: generally strings complicate the situation, inside a string
-;; you should only allow for file completion (and to detect it
-;; properly, change the quote chars)
+;; NOTE: duration with units could be done with a sexp like (rest "1s")
 ;; TODO: add debug mode
