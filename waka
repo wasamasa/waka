@@ -232,16 +232,7 @@
     (error "Unknown instrument"))))
 
 (define (sequence-instruments sequence)
-  (append-map
-   (lambda (sexps)
-     (cons (car sexps)
-           (filter-map
-            (lambda (sexp)
-              (and (eqv? (car sexp) 'sexp)
-                   (eqv? (cadr sexp) 'instrument)
-                   (->instrument-id (caddr sexp))))
-            (cdr sexps))))
-   sequence))
+  (map car sequence))
 
 (define loaded-instruments (make-eqv-hashtable))
 
