@@ -1,5 +1,5 @@
 KAWAC = kawa --main -C
-SOURCE = waka.scm
+SOURCE = waka
 MAINCLASS = waka
 JAR = waka.jar
 RM = rm -rf
@@ -13,7 +13,7 @@ JARS = $(KAWAJAR) $(JLINEJAR)
 
 all: waka.jar
 
-%.class: %.scm
+$(MAINCLASS).class: $(SOURCE)
 	$(KAWAC) $<
 
 manifest.txt:
